@@ -1,6 +1,24 @@
 # 🚀 Panduan Deployment E-Vote ke VPS Production
 
-Dokumentasi lengkap untuk deploy aplikasi e-voting dari GitHub ke VPS production dengan Nginx, PM2, dan SSL.
+Dokumentasi lengkap untuk deploy aplikasi e-voting dari GitHub ke VPS production dengan **Nginx** atau **FrankenPHP**, PM2, dan SSL.
+
+## 🌟 Pilihan Server Web
+
+### **Option 1: Nginx (Traditional & Stable)**
+- ✅ Mature dan battle-tested
+- ✅ Ekstensif dokumentasi
+- ✅ Wide compatibility
+- ✅ Manual SSL configuration
+
+### **Option 2: FrankenPHP (Modern & Automated)**
+- ✅ Automatic HTTPS dengan Let's Encrypt
+- ✅ HTTP/3 dan modern protocols
+- ✅ Zero-config SSL setup
+- ✅ Built-in performance optimizations
+
+**Recommendation**: Pilih **FrankenPHP** untuk setup modern dan otomatis, atau **Nginx** untuk kompatibilitas maksimal.
+
+---
 
 ## 📋 Prerequisites
 
@@ -12,7 +30,7 @@ Dokumentasi lengkap untuk deploy aplikasi e-voting dari GitHub ke VPS production
 
 ### 2. Software Yang Dibutuhkan
 - Node.js 18+ 
-- Nginx
+- **Nginx** ATAU **FrankenPHP** (pilih salah satu)
 - PM2 (Process Manager)
 - Git
 - SQLite3
@@ -260,6 +278,199 @@ sudo nginx -t
 # Restart Nginx
 sudo systemctl restart nginx
 ```
+
+---
+
+## 🌐 Alternatif: Konfigurasi FrankenPHP (Modern Server)
+
+**FrankenPHP adalah alternatif modern untuk Nginx yang mendukung HTTP/3, Caddy server, dan performa tinggi.**
+
+### 1. Install FrankenPHP
+```bash
+# Download FrankenPHP binary
+sudo curl -L https://github.com/dunglas/frankenphp/releases/latest/download/frankenphp-linux-x86_64 -o /usr/local/bin/frankenphp
+sudo chmod +x /usr/local/bin/frankenphp
+
+# Create frankenphp user
+sudo useradd --system --create-home --shell /bin/bash frankenphp
+```
+
+### 2. Buat Konfigurasi FrankenPHP
+```bash
+sudo mkdir -p /etc/frankenphp
+sudo nano /etc/frankenphp/Caddyfile
+```
+
+Isi konfigurasi **dengan domain**:
+```caddy
+yourdomain.com, www.yourdomain.com {
+    # Enable automatic HTTPS
+    tls {
+        email your-email@example.com
+    }
+    
+    # Reverse proxy to Next.js
+    reverse_proxy localhost:3000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # XSS Protection
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        # CSP
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;"
+        # Remove server info
+        -Server
+    }
+    
+    # File upload limit
+    request_body {
+        max_size 10MB
+    }
+    
+    # Logging
+    log {
+        output file /var/log/frankenphp/access.log
+        format json
+    }
+}
+```
+
+Atau untuk **tanpa domain (IP only)**:
+```caddy
+:80 {
+    # Reverse proxy to Next.js
+    reverse_proxy localhost:3000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+    
+    # Security headers
+    header {
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        -Server
+    }
+    
+    # File upload limit
+    request_body {
+        max_size 10MB
+    }
+    
+    # Logging
+    log {
+        output file /var/log/frankenphp/access.log
+        format json
+    }
+}
+```
+
+### 3. Setup FrankenPHP Service
+```bash
+sudo nano /etc/systemd/system/frankenphp.service
+```
+
+Isi service file:
+```ini
+[Unit]
+Description=FrankenPHP HTTP Server
+Documentation=https://frankenphp.dev/
+After=network.target
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/frankenphp run --config /etc/frankenphp/Caddyfile
+ExecReload=/bin/kill -USR1 $MAINPID
+TimeoutStopSec=5s
+KillMode=mixed
+KillSignal=SIGINT
+User=frankenphp
+Group=frankenphp
+Restart=on-failure
+RestartSec=5s
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/log/frankenphp /var/lib/frankenphp
+
+# Environment
+Environment=HOME=/home/frankenphp
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 4. Setup Logs dan Permissions
+```bash
+# Create log directory
+sudo mkdir -p /var/log/frankenphp
+sudo chown frankenphp:frankenphp /var/log/frankenphp
+
+# Create lib directory
+sudo mkdir -p /var/lib/frankenphp
+sudo chown frankenphp:frankenphp /var/lib/frankenphp
+
+# Set file permissions
+sudo chown frankenphp:frankenphp /etc/frankenphp/Caddyfile
+sudo chmod 644 /etc/frankenphp/Caddyfile
+```
+
+### 5. Start FrankenPHP Service
+```bash
+# Enable and start service
+sudo systemctl daemon-reload
+sudo systemctl enable frankenphp
+sudo systemctl start frankenphp
+
+# Check status
+sudo systemctl status frankenphp
+
+# View logs
+sudo journalctl -u frankenphp -f
+```
+
+### 6. FrankenPHP Firewall (jika menggunakan UFW)
+```bash
+# Allow HTTP and HTTPS
+sudo ufw allow 80
+sudo ufw allow 443
+
+# Enable firewall
+sudo ufw --force enable
+```
+
+### **Keuntungan FrankenPHP vs Nginx:**
+
+✅ **FrankenPHP Advantages:**
+- **Automatic HTTPS**: SSL certificate otomatis dengan Let's Encrypt
+- **HTTP/3 Support**: Performa lebih cepat dengan QUIC protocol
+- **Zero Configuration**: Setup minimal untuk HTTPS
+- **Modern Features**: WebSocket support, Server-Sent Events
+- **Better Performance**: Built with Go, optimized untuk modern web
+- **Automatic Reload**: Configuration reload tanpa downtime
+
+✅ **Nginx Advantages:**
+- **Mature & Stable**: Lebih banyak dokumentasi dan community
+- **Wide Support**: Compatible dengan banyak hosting provider
+- **Extensive Modules**: Plugin ecosystem yang besar
+- **Battle Tested**: Proven di production skala besar
+
+### **Pilihan Server Recommendation:**
+
+- **FrankenPHP**: Pilih jika ingin setup modern, otomatis HTTPS, HTTP/3
+- **Nginx**: Pilih jika butuh kompatibilitas luas dan ecosystem mature
 
 ---
 
