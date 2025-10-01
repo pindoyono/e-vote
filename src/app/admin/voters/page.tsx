@@ -159,7 +159,7 @@ export default function AdminVotersPage() {
                     const workbook = XLSX.read(data, { type: 'array' })
                     const sheetName = workbook.SheetNames[0]
                     const worksheet = workbook.Sheets[sheetName]
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as string[][]
 
                     // Skip header row and process data
                     const votersData = jsonData.slice(1).filter(row => row.length >= 3).map(row => ({

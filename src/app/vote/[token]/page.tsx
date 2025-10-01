@@ -160,9 +160,9 @@ export default function VotePage() {
                             Petunjuk Pemilihan
                         </h3>
                         <div className="text-left space-y-2 text-gray-700">
-                            <p>1. Pilih salah satu kandidat dengan mengklik tombol "PILIH"</p>
+                            <p>1. Pilih salah satu kandidat dengan mengklik tombol &quot;PILIH&quot;</p>
                             <p>2. Pastikan pilihan Anda sudah benar</p>
-                            <p>3. Klik tombol "VOTE" untuk mengonfirmasi pilihan</p>
+                            <p>3. Klik tombol &quot;VOTE&quot; untuk mengonfirmasi pilihan</p>
                             <p>4. Anda hanya dapat memilih sekali</p>
                         </div>
                     </div>
@@ -179,8 +179,8 @@ export default function VotePage() {
                             <Card
                                 key={candidate.id}
                                 className={`cursor-pointer transition-all duration-200 transform hover:scale-105 ${selectedCandidate === candidate.id
-                                        ? 'ring-4 ring-blue-500 bg-blue-50'
-                                        : 'hover:shadow-lg'
+                                    ? 'ring-4 ring-blue-500 bg-blue-50'
+                                    : 'hover:shadow-lg'
                                     }`}
                                 onClick={() => setSelectedCandidate(candidate.id)}
                             >

@@ -2,8 +2,9 @@
 
 import { useSearchParams } from 'next/navigation'
 import { Card } from '@/components/Card'
+import { Suspense } from 'react'
 
-export default function ThankYouPage() {
+function ThankYouContent() {
     const searchParams = useSearchParams()
     const candidateName = searchParams.get('candidate')
 
@@ -72,5 +73,20 @@ export default function ThankYouPage() {
                 </Card>
             </div>
         </div>
+    )
+}
+
+export default function ThankYouPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="text-6xl mb-4">⏳</div>
+                    <p className="text-xl text-gray-600">Loading...</p>
+                </div>
+            </div>
+        }>
+            <ThankYouContent />
+        </Suspense>
     )
 }
