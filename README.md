@@ -237,3 +237,4 @@ Project ini dikembangkan untuk SMK N 2 MALINAU. Untuk kontribusi atau pertanyaan
 ## Lisensi
 
 Copyright © 2025 SMK N 2 MALINAU. All rights reserved.
+# e-vote
