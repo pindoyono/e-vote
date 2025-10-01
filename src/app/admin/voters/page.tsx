@@ -97,10 +97,10 @@ export default function AdminVotersPage() {
                 setShowAddForm(false)
                 alert('Pemilih berhasil ditambahkan!')
             } else {
-                const error = await response.json()
-                alert(error.error || 'Gagal menambahkan pemilih')
+                const errorData = await response.json()
+                alert(errorData.error || 'Gagal menambahkan pemilih')
             }
-        } catch (error) {
+        } catch {
             alert('Network error. Please try again.')
         } finally {
             setAdding(false)
@@ -191,11 +191,11 @@ export default function AdminVotersPage() {
                             if (response.ok) {
                                 successCount++
                             } else {
-                                const error = await response.json()
-                                errors.push(`${voterData.studentId}: ${error.error}`)
+                                const errorData = await response.json()
+                                errors.push(`${voterData.studentId}: ${errorData.error}`)
                                 errorCount++
                             }
-                        } catch (error) {
+                        } catch {
                             errors.push(`${voterData.studentId}: Network error`)
                             errorCount++
                         }

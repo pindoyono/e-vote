@@ -103,10 +103,10 @@ export default function AdminCandidatesPage() {
                 setShowAddForm(false)
                 alert('Kandidat berhasil ditambahkan!')
             } else {
-                const error = await response.json()
-                alert(error.error || 'Gagal menambahkan kandidat')
+                const errorData = await response.json()
+                alert(errorData.error || 'Gagal menambahkan kandidat')
             }
-        } catch (error) {
+        } catch {
             alert('Network error. Please try again.')
         } finally {
             setAdding(false)

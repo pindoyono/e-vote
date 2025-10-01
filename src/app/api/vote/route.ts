@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create vote and update voter in a transaction
-        const result = await prisma.$transaction(async (tx) => {
+        await prisma.$transaction(async (tx) => {
             // Create the vote
             const vote = await tx.vote.create({
                 data: {

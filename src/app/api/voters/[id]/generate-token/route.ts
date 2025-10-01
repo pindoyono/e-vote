@@ -33,7 +33,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
         const voteToken = generateVoteToken()
 
-        const updatedVoter = await prisma.voter.update({
+        await prisma.voter.update({
             where: { id },
             data: {
                 voteToken,

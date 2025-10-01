@@ -38,6 +38,7 @@ export default function VotePage() {
             verifyToken()
             fetchCandidates()
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token])
 
     const verifyToken = async () => {
@@ -50,7 +51,7 @@ export default function VotePage() {
             } else {
                 setError(data.error || 'Token tidak valid')
             }
-        } catch (error) {
+        } catch {
             setError('Network error. Please try again.')
         }
     }
@@ -96,7 +97,7 @@ export default function VotePage() {
             } else {
                 setError(data.error || 'Failed to submit vote')
             }
-        } catch (error) {
+        } catch {
             setError('Network error. Please try again.')
         } finally {
             setSubmitting(false)
