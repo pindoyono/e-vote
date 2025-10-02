@@ -48,18 +48,28 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-100 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        E-Vote OSIS
+                        Login Admin/Panitia
                     </h1>
-                    <p className="text-gray-600">
-                        SMK N 2 MALINAU
+                    <h2 className="text-lg text-gray-600 mb-2">
+                        E-Vote OSIS SMK N 2 MALINAU
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                        Khusus untuk Administrator dan Panitia Pemilihan
                     </p>
                 </div>
 
                 <Card>
+                    <div className="text-center mb-6">
+                        <div className="text-4xl mb-3">🔐</div>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            Area Terbatas
+                        </h3>
+                    </div>
+
                     <form onSubmit={handleLogin} className="space-y-4">
                         <Input
                             label="Username"
@@ -68,6 +78,7 @@ export default function LoginPage() {
                             onChange={(e) => setUsername(e.target.value)}
                             required
                             disabled={loading}
+                            placeholder="Masukkan username"
                         />
 
                         <Input
@@ -77,10 +88,11 @@ export default function LoginPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                             disabled={loading}
+                            placeholder="Masukkan password"
                         />
 
                         {error && (
-                            <div className="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                            <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm text-center">
                                 {error}
                             </div>
                         )}
@@ -90,14 +102,39 @@ export default function LoginPage() {
                             className="w-full"
                             disabled={loading}
                         >
-                            {loading ? 'Logging in...' : 'Login'}
+                            {loading ? 'Masuk...' : 'Masuk'}
                         </Button>
                     </form>
+
+                    {/* Default Credentials Info */}
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 text-center mb-2">
+                            Kredensial Default (Harap diganti setelah login):
+                        </p>
+                        <div className="text-xs text-gray-600 space-y-1">
+                            <p><strong>Admin:</strong> admin / admin123</p>
+                            <p><strong>Panitia:</strong> committee / committee123</p>
+                        </div>
+                    </div>
                 </Card>
 
-                <div className="mt-6 text-center text-sm text-gray-500">
-                    <p>Sistem Pemilihan Ketua OSIS</p>
-                    <p>SMK N 2 MALINAU</p>
+                {/* Back to Voting */}
+                <div className="mt-6 text-center">
+                    <p className="text-gray-500 text-sm mb-3">
+                        Ingin memilih sebagai pemilih?
+                    </p>
+                    <Button
+                        variant="outline"
+                        onClick={() => router.push('/')}
+                        className="text-sm"
+                    >
+                        🗳️ Kembali ke Halaman Pemilihan
+                    </Button>
+                </div>
+
+                <div className="mt-6 text-center text-sm text-gray-400">
+                    <p>© 2025 SMK N 2 MALINAU</p>
+                    <p>Sistem E-Voting OSIS</p>
                 </div>
             </div>
         </div>
