@@ -1,47 +1,35 @@
-# 📚 Deployment Quick Start Guide
+# 📚 Panduan Deployment Cepat - VPS Ubuntu
 
-Panduan singkat untuk deploy sistem e-voting SMK N 2 Malinau.
+Panduan singkat untuk deploy sistem e-voting SMK N 2 Malinau di VPS Ubuntu dengan Nginx.
 
 ## 🚀 Quick Deployment Options
 
-### Option 1: Automatic Script (Recommended)
+### Option 1: Script Otomatis (Direkomendasikan)
 ```bash
-# Download and run deployment script
+# Download dan jalankan script deployment
 wget https://raw.githubusercontent.com/pindoyono/e-vote/main/deploy.sh
 chmod +x deploy.sh
 sudo ./deploy.sh your-domain.com your-email@domain.com
 ```
 
-### Option 2: Docker (Advanced)
-```bash
-# Clone repository
-git clone https://github.com/pindoyono/e-vote.git
-cd e-vote
+### Option 2: Manual Step-by-Step
+Ikuti langkah lengkap di [VPS-DEPLOYMENT.md](./VPS-DEPLOYMENT.md)
 
-# Copy and edit environment
-cp .env.example .env.docker
-nano .env.docker
+## 📋 Prasyarat VPS
 
-# Run with Docker
-docker-compose up -d --build
-```
-
-### Option 3: Manual (Full Control)
-Ikuti langkah lengkap di [DEPLOYMENT.md](./DEPLOYMENT.md)
-
-## 📋 Prerequisites
-
-### Minimum Server Requirements
+### Spesifikasi Server Minimum
 - **OS**: Ubuntu 20.04+ 
 - **RAM**: 2GB minimum (4GB recommended)
 - **Storage**: 20GB SSD
 - **CPU**: 2 vCPU
-- **Domain**: Pointing to server IP
+- **Domain**: Pointing ke IP server
 
-### Software Requirements
+### Yang Diperlukan
 - Node.js 20+
 - Nginx
+- PM2
 - SSL Certificate (Let's Encrypt)
+- SQLite3
 
 ## ⚡ One-Command Deployment
 
@@ -57,7 +45,7 @@ curl -fsSL https://raw.githubusercontent.com/pindoyono/e-vote/main/deploy.sh | b
 - **Committee Panel**: https://your-domain.com/committee
 
 ### 2. Default Credentials
-Check generated passwords in deployment output or:
+Cek password yang di-generate di output deployment atau:
 ```bash
 cat /var/www/e-vote-production/.env.production
 ```
@@ -84,13 +72,13 @@ sudo nginx -t
 # Check certificate status
 sudo certbot certificates
 
-# Renew manually if needed
+# Renew manual jika diperlukan
 sudo certbot renew
 ```
 
-## 🛠️ Troubleshooting
+## 🛠️ Troubleshooting Cepat
 
-### Application Not Starting
+### Application Tidak Jalan
 ```bash
 # Check PM2 status
 pm2 status
@@ -105,7 +93,7 @@ pm2 logs e-vote-production
 # Check certificate
 sudo certbot certificates
 
-# Test nginx configuration
+# Test nginx config
 sudo nginx -t
 
 # Reload nginx
@@ -117,7 +105,7 @@ sudo systemctl reload nginx
 # Check database file
 ls -la /var/www/e-vote-production/prisma/production.db
 
-# Reset database (WARNING: deletes all data)
+# Reset database (WARNING: hapus semua data)
 cd /var/www/e-vote-production
 npx prisma migrate reset
 ```
@@ -155,16 +143,16 @@ sudo ufw status
 ### SSL Configuration
 ```bash
 # Test SSL rating
-openssl s_client -connect your-domain.com:443 -servername your-domain.com
+curl -I https://your-domain.com
 ```
 
 ### Log Monitoring
 ```bash
 # Nginx access logs
-sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/e-vote-access.log
 
 # Nginx error logs
-sudo tail -f /var/log/nginx/error.log
+sudo tail -f /var/log/nginx/e-vote-error.log
 
 # Application logs
 pm2 logs e-vote-production
@@ -172,8 +160,7 @@ pm2 logs e-vote-production
 
 ## 📞 Support
 
-- **📖 Full Documentation**: [DEPLOYMENT.md](./DEPLOYMENT.md)
-- **🐳 Docker Guide**: [DOCKER.md](./DOCKER.md)
+- **📖 Full Documentation**: [VPS-DEPLOYMENT.md](./VPS-DEPLOYMENT.md)
 - **🐛 Issues**: [GitHub Issues](https://github.com/pindoyono/e-vote/issues)
 - **📧 Email**: support@smkn2malinau.sch.id
 

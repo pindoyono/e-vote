@@ -45,27 +45,24 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 
 ## 🚀 Quick Start
 
-### 🏭 Production Deployment
+### 🏭 Production Deployment (VPS Ubuntu + Nginx)
 
-#### Option 1: One-Command Deployment (Recommended)
+#### Option 1: One-Command Deployment (Direkomendasikan)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/pindoyono/e-vote/main/deploy.sh | bash -s your-domain.com admin@your-domain.com
 ```
 
-#### Option 2: Docker Deployment
+#### Option 2: Manual Step-by-Step
 ```bash
 git clone https://github.com/pindoyono/e-vote.git
 cd e-vote
-docker-compose up -d --build
+# Ikuti panduan lengkap di VPS-DEPLOYMENT.md
 ```
 
-#### Option 3: Manual Deployment
-Ikuti panduan lengkap di [DEPLOYMENT.md](./DEPLOYMENT.md)
-
-**📚 Deployment Guides:**
-- 🚀 [Quick Start Guide](./DEPLOY-QUICK.md) - Panduan singkat
-- 📖 [Full Deployment Guide](./DEPLOYMENT.md) - Panduan lengkap dengan Nginx
-- 🐳 [Docker Guide](./DOCKER.md) - Deployment dengan Docker
+**📚 Panduan Deployment:**
+- 🚀 [Quick Start VPS](./DEPLOY-QUICK.md) - Panduan singkat VPS Ubuntu
+- 📖 [VPS Deployment Guide](./VPS-DEPLOYMENT.md) - Panduan lengkap VPS dengan Nginx
+- 🐳 [Docker Guide](./DOCKER.md) - Deployment dengan Docker (opsional)
 
 ### 💻 Development Setup
 
@@ -329,7 +326,7 @@ npm run dev
 - Auto-refresh setiap 5 detik
 - Statistik lengkap dan trend voting
 
-## 🚀 Production Deployment
+## 🚀 Production Deployment (VPS Ubuntu)
 
 ### Server Requirements
 - **OS**: Ubuntu 20.04+ (recommended)
@@ -340,7 +337,7 @@ npm run dev
 
 ### Deployment Options
 
-#### 1. Automatic Script (Recommended)
+#### 1. Automatic Script (Direkomendasikan)
 Deployment otomatis dengan Nginx, SSL, dan PM2:
 
 ```bash
@@ -358,47 +355,36 @@ sudo ./deploy.sh your-domain.com your-email@domain.com
 - ✅ Health monitoring
 - ✅ Security hardening
 
-#### 2. Docker Deployment
-Containerized deployment dengan Docker Compose:
+#### 2. Manual Deployment
+Custom deployment dengan kontrol penuh:
 
 ```bash
+# 1. Clone repository
 git clone https://github.com/pindoyono/e-vote.git
 cd e-vote
-cp .env.example .env.docker
-# Edit .env.docker with your configuration
-docker-compose up -d --build
-```
 
-**Features:**
-- ✅ Isolated environment
-- ✅ Easy scaling
-- ✅ Built-in monitoring
-- ✅ Redis session storage
-- ✅ PostgreSQL option
+# 2. Install dependencies
+npm ci --production
 
-#### 3. Manual Deployment
-Custom deployment with full control:
-
-```bash
-# 1. Build aplikasi
-npm run build
-
-# 2. Set environment variables
+# 3. Setup environment
 cp .env.example .env.production
 
-# 3. Configure database
+# 4. Build aplikasi
+npm run build
+
+# 5. Setup database
 npx prisma migrate deploy
 
-# 4. Start with PM2
+# 6. Start with PM2
 pm2 start ecosystem.config.js
 ```
 
 ### Post-Deployment Checklist
 - [ ] SSL certificate working
-- [ ] Domain pointing to server
+- [ ] Domain pointing ke server
 - [ ] Admin access configured
 - [ ] Backup system enabled
-- [ ] Monitoring alerts set
+- [ ] Monitoring setup
 - [ ] Performance testing done
 
 ### Management Commands
@@ -415,19 +401,19 @@ sudo systemctl status nginx
 
 # View logs
 pm2 logs e-vote-production
-sudo tail -f /var/log/nginx/error.log
+sudo tail -f /var/log/nginx/e-vote-error.log
 ```
 
 ### Troubleshooting
-- **Application won't start**: Check PM2 logs
-- **SSL issues**: Verify certificate with `sudo certbot certificates`
-- **Database errors**: Check file permissions and disk space
-- **High memory usage**: Restart PM2 or increase server resources
+- **Application won't start**: Check PM2 logs dengan `pm2 logs e-vote-production`
+- **SSL issues**: Verify certificate dengan `sudo certbot certificates`
+- **Database errors**: Check file permissions dan disk space
+- **High memory usage**: Restart PM2 atau increase server resources
 
 **📚 Complete Deployment Guides:**
-- [Quick Start Guide](./DEPLOY-QUICK.md)
-- [Full Deployment Guide](./DEPLOYMENT.md)
-- [Docker Guide](./DOCKER.md)
+- [Quick Start VPS](./DEPLOY-QUICK.md)
+- [Full VPS Deployment Guide](./VPS-DEPLOYMENT.md)
+- [Docker Guide](./DOCKER.md) (opsional)
 
 ## 🤝 Kontribusi
 

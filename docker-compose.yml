@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # E-Voting Application
   app:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     container_name: evote-app
@@ -25,7 +25,7 @@ services:
     networks:
       - evote-network
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health || exit 1"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -63,7 +63,7 @@ services:
     networks:
       - evote-network
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 30s
       timeout: 10s
       retries: 3

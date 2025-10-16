@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# E-Voting System - Quick Deployment Script
+# E-Voting System - VPS Ubuntu Deployment Script
 # SMK Negeri 2 Malinau
+# Deployment untuk VPS Ubuntu dengan Nginx (tanpa Docker)
 # Usage: ./deploy.sh [domain] [email]
 
 set -e
