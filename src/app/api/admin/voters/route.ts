@@ -13,10 +13,22 @@ export async function GET() {
         }
 
         const voters = await prisma.voter.findMany({
+            include: {
+                votes: {
+                    include: {
+                        candidate: {
+                            select: {
+                                name: true,
+                                orderNumber: true
+                            }
+                        }
+                    }
+                }
+            },
             orderBy: { createdAt: 'desc' }
         })
 
-        return NextResponse.json(voters)
+        return NextResponse.json({ voters })
     } catch (error) {
         console.error('Voters API error:', error)
         return NextResponse.json(

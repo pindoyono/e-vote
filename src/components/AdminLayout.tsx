@@ -11,7 +11,8 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    RotateCcw
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -24,6 +25,7 @@ const menuItems = [
     { href: '/admin/voters', label: 'Data Pemilih', icon: Users },
     { href: '/admin/candidates', label: 'Kandidat', icon: UserCheck },
     { href: '/admin/verification', label: 'Verifikasi', icon: UserCheck },
+    { href: '/admin/vote-management', label: 'Manajemen Vote', icon: RotateCcw },
     { href: '/admin/settings', label: 'Pengaturan', icon: Settings },
 ]
 

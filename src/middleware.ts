@@ -12,5 +12,5 @@ export default withAuth(
 )
 
 export const config = {
-    matcher: ['/admin/dashboard/:path*', '/admin/voters/:path*', '/admin/candidates/:path*']
+    matcher: ['/admin/dashboard/:path*', '/admin/voters/:path*', '/admin/candidates/:path*', '/admin/vote-management/:path*']
 }

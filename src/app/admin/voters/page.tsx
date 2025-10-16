@@ -35,7 +35,7 @@ export default function VotersPage() {
         try {
             const response = await fetch('/api/admin/voters')
             const data = await response.json()
-            setVoters(data)
+            setVoters(data.voters || [])
         } catch (error) {
             console.error('Error fetching voters:', error)
         } finally {
