@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admins")
+}
+
+model Committee {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   @default("verifikator")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("committees")
+}
+
+model Candidate {
+  id          String @id @default(cuid())
+  name        String
+  class       String
+  vision      String
+  mission     String
+  photo       String?
+  orderNumber Int    @unique
+  votes       Vote[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("candidates")
+}
+
+model Voter {
+  id        String   @id @default(cuid())
+  name      String
+  class     String
+  nisn      String   @unique
+  isVerified Boolean @default(false)
+  hasVoted  Boolean  @default(false)
+  voteToken String?  @unique
+  votes     Vote[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("voters")
+}
+
+model Vote {
+  id          String    @id @default(cuid())
+  voterId     String
+  candidateId String
+  voteToken   String
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  voter     Voter     @relation(fields: [voterId], references: [id])
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+
+  @@unique([voterId, candidateId])
+  @@map("votes")
+}
+
+model VotingSession {
+  id          String   @id @default(cuid())
+  isActive    Boolean  @default(false)
+  startTime   DateTime?
+  endTime     DateTime?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("voting_sessions")
+}

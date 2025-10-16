@@ -1,103 +1,125 @@
-import Image from "next/image";
+import Link from 'next/link'
+import { Vote, Users, BarChart3, Shield } from 'lucide-react'
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+export default function HomePage() {
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
+            {/* Hero Section */}
+            <div className="flex items-center justify-center min-h-screen px-4">
+                <div className="text-center max-w-4xl mx-auto">
+                    {/* Logo/Icon */}
+                    <div className="mb-8">
+                        <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-2xl mb-6">
+                            <Vote className="w-12 h-12 text-blue-600" />
+                        </div>
+                    </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+                    {/* Main Title */}
+                    <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
+                        E-VOTE
+                    </h1>
+                    <h2 className="text-2xl md:text-3xl font-semibold text-blue-200 mb-6">
+                        Pemilihan Ketua OSIS
+                    </h2>
+                    <h3 className="text-xl md:text-2xl text-blue-300 mb-8">
+                        SMK Negeri 2 Malinau
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-lg text-blue-100 mb-12 max-w-2xl mx-auto leading-relaxed">
+                        Sistem pemilihan elektronik yang aman, transparan, dan modern untuk
+                        memilih ketua OSIS periode 2025. Setiap suara berharga dan akan dihitung
+                        dengan akurat.
+                    </p>
+
+                    {/* Features */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                            <Shield className="w-12 h-12 text-green-400 mx-auto mb-4" />
+                            <h4 className="text-xl font-semibold text-white mb-2">Aman</h4>
+                            <p className="text-blue-200 text-sm">
+                                Sistem keamanan berlapis dengan verifikasi identitas
+                            </p>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                            <Users className="w-12 h-12 text-blue-400 mx-auto mb-4" />
+                            <h4 className="text-xl font-semibold text-white mb-2">Transparan</h4>
+                            <p className="text-blue-200 text-sm">
+                                Monitoring hasil secara realtime dan akurat
+                            </p>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
+                            <BarChart3 className="w-12 h-12 text-purple-400 mx-auto mb-4" />
+                            <h4 className="text-xl font-semibold text-white mb-2">Modern</h4>
+                            <p className="text-blue-200 text-sm">
+                                Interface yang mudah digunakan dan responsive
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* CTA Buttons */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+                        <Link
+                            href="/admin/login"
+                            className="bg-white hover:bg-gray-100 text-blue-900 font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
+                        >
+                            <Shield className="h-5 w-5" />
+                            <span>Admin Panel</span>
+                        </Link>
+                        <Link
+                            href="/committee/login"
+                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
+                        >
+                            <Users className="h-5 w-5" />
+                            <span>Portal Panitia</span>
+                        </Link>
+                        <Link
+                            href="/monitoring"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
+                        >
+                            <BarChart3 className="h-5 w-5" />
+                            <span>Monitoring</span>
+                        </Link>
+                    </div>
+
+                    {/* Role Description */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                            <h4 className="text-lg font-semibold text-white mb-2">Administrator</h4>
+                            <p className="text-blue-200 text-sm">
+                                Kelola data pemilih, atur sistem, dan kontrol penuh aplikasi
+                            </p>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                            <h4 className="text-lg font-semibold text-white mb-2">Panitia</h4>
+                            <p className="text-blue-200 text-sm">
+                                Verifikasi pemilih dan generate URL voting untuk siswa
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="mt-12 bg-yellow-100 border border-yellow-300 rounded-lg p-6 text-yellow-800">
+                        <h4 className="font-semibold mb-2">Informasi Penting:</h4>
+                        <ul className="text-sm space-y-1 text-left max-w-lg mx-auto">
+                            <li>• Pemilihan dilakukan secara online dengan URL unik</li>
+                            <li>• Setiap pemilih harus diverifikasi terlebih dahulu oleh panitia</li>
+                            <li>• Satu pemilih hanya dapat memberikan satu suara</li>
+                            <li>• Hasil dapat dipantau secara realtime</li>
+                        </ul>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="mt-16 pt-8 border-t border-white/20">
+                        <p className="text-blue-300 text-sm">
+                            © 2025 SMK Negeri 2 Malinau - Sistem E-Voting Pemilihan Ketua OSIS
+                        </p>
+                        <p className="text-blue-400 text-xs mt-2">
+                            Dikembangkan dengan teknologi Next.js dan keamanan tingkat tinggi
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    )
 }
