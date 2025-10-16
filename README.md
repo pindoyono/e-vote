@@ -45,11 +45,35 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 
 ## 🚀 Quick Start
 
-### Prasyarat
+### 🏭 Production Deployment
+
+#### Option 1: One-Command Deployment (Recommended)
+```bash
+curl -fsSL https://raw.githubusercontent.com/pindoyono/e-vote/main/deploy.sh | bash -s your-domain.com admin@your-domain.com
+```
+
+#### Option 2: Docker Deployment
+```bash
+git clone https://github.com/pindoyono/e-vote.git
+cd e-vote
+docker-compose up -d --build
+```
+
+#### Option 3: Manual Deployment
+Ikuti panduan lengkap di [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+**📚 Deployment Guides:**
+- 🚀 [Quick Start Guide](./DEPLOY-QUICK.md) - Panduan singkat
+- 📖 [Full Deployment Guide](./DEPLOYMENT.md) - Panduan lengkap dengan Nginx
+- 🐳 [Docker Guide](./DOCKER.md) - Deployment dengan Docker
+
+### 💻 Development Setup
+
+#### Prasyarat
 - Node.js 18+ 
 - npm atau yarn atau pnpm
 
-### Instalasi Cepat
+#### Instalasi Cepat
 
 ```bash
 # Clone repository
@@ -307,27 +331,103 @@ npm run dev
 
 ## 🚀 Production Deployment
 
-1. **Build Aplikasi**
-   ```bash
-   npm run build
-   ```
+### Server Requirements
+- **OS**: Ubuntu 20.04+ (recommended)
+- **RAM**: 2GB minimum (4GB recommended)
+- **Storage**: 20GB SSD minimum
+- **CPU**: 2 vCPU minimum
+- **Domain**: Pointing to server IP
 
-2. **Set Environment Variables**
-   ```env
-   DATABASE_URL="file:./prod.db"
-   NEXTAUTH_URL="https://your-domain.com"
-   NEXTAUTH_SECRET="your-production-secret"
-   ```
+### Deployment Options
 
-3. **Run Migration**
-   ```bash
-   npx prisma migrate deploy
-   ```
+#### 1. Automatic Script (Recommended)
+Deployment otomatis dengan Nginx, SSL, dan PM2:
 
-4. **Start Production Server**
-   ```bash
-   npm start
-   ```
+```bash
+# Download and run deployment script
+wget https://raw.githubusercontent.com/pindoyono/e-vote/main/deploy.sh
+chmod +x deploy.sh
+sudo ./deploy.sh your-domain.com your-email@domain.com
+```
+
+**Features:**
+- ✅ Nginx reverse proxy
+- ✅ SSL certificate (Let's Encrypt)
+- ✅ PM2 process manager
+- ✅ Auto-backup system
+- ✅ Health monitoring
+- ✅ Security hardening
+
+#### 2. Docker Deployment
+Containerized deployment dengan Docker Compose:
+
+```bash
+git clone https://github.com/pindoyono/e-vote.git
+cd e-vote
+cp .env.example .env.docker
+# Edit .env.docker with your configuration
+docker-compose up -d --build
+```
+
+**Features:**
+- ✅ Isolated environment
+- ✅ Easy scaling
+- ✅ Built-in monitoring
+- ✅ Redis session storage
+- ✅ PostgreSQL option
+
+#### 3. Manual Deployment
+Custom deployment with full control:
+
+```bash
+# 1. Build aplikasi
+npm run build
+
+# 2. Set environment variables
+cp .env.example .env.production
+
+# 3. Configure database
+npx prisma migrate deploy
+
+# 4. Start with PM2
+pm2 start ecosystem.config.js
+```
+
+### Post-Deployment Checklist
+- [ ] SSL certificate working
+- [ ] Domain pointing to server
+- [ ] Admin access configured
+- [ ] Backup system enabled
+- [ ] Monitoring alerts set
+- [ ] Performance testing done
+
+### Management Commands
+```bash
+# Update application
+sudo /usr/local/bin/update-evote.sh
+
+# Backup system
+sudo /usr/local/bin/backup-evote.sh
+
+# Check status
+pm2 status
+sudo systemctl status nginx
+
+# View logs
+pm2 logs e-vote-production
+sudo tail -f /var/log/nginx/error.log
+```
+
+### Troubleshooting
+- **Application won't start**: Check PM2 logs
+- **SSL issues**: Verify certificate with `sudo certbot certificates`
+- **Database errors**: Check file permissions and disk space
+- **High memory usage**: Restart PM2 or increase server resources
+
+**📚 Complete Deployment Guides:**
+- [Quick Start Guide](./DEPLOY-QUICK.md)
+- [Full Deployment Guide](./DEPLOYMENT.md)
+- [Docker Guide](./DOCKER.md)
 
 ## 🤝 Kontribusi
 
