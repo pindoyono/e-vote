@@ -7,14 +7,21 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 ### 🔐 Admin Panel
 - **Autentikasi Admin**: Login aman dengan NextAuth.js
 - **Manajemen Data Pemilih**: CRUD pemilih, import/export CSV
+- **Manajemen Kandidat**: CRUD kandidat dengan upload foto
 - **Verifikasi Pemilih**: Generate URL voting unik untuk setiap pemilih
 - **Dashboard Real-time**: Monitoring hasil pemilihan secara langsung
 - **Kontrol Pemilihan**: Aktifkan/nonaktifkan sesi voting
 - **Reset Data**: Reset semua data voting jika diperlukan
 
+### 👥 Committee Panel
+- **Login Panitia**: Akses terpisah untuk panitia pemilihan
+- **Verifikasi Pemilih**: Panitia dapat memverifikasi data pemilih
+- **Manajemen Token**: Generate dan kelola token voting
+
 ### 🗳️ Sistem Voting
-- **URL Unik**: Setiap pemilih mendapat URL voting yang unik dan aman
+- **URL Unik**: Setiap pemilih mendapat URL voting yang unik dan aman (5 karakter)
 - **Interface Responsif**: Desain yang user-friendly dan mobile-responsive
+- **Foto Kandidat**: Tampilan foto kandidat yang professional
 - **Validasi Ketat**: Satu pemilih hanya bisa voting sekali
 - **Audit Trail**: Pencatatan IP address dan user agent untuk keamanan
 
@@ -30,23 +37,43 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 - **Backend**: Next.js API Routes
 - **Database**: SQLite dengan Prisma ORM
 - **Authentication**: NextAuth.js
+- **File Upload**: Multer (untuk foto kandidat)
 - **Charts**: Recharts
 - **Icons**: Lucide React
 - **Validation**: Zod
 - **Forms**: React Hook Form
 
-## 🚀 Instalasi dan Setup
+## 🚀 Quick Start
 
 ### Prasyarat
 - Node.js 18+ 
-- npm atau yarn
+- npm atau yarn atau pnpm
 
-### Langkah Instalasi
+### Instalasi Cepat
 
-1. **Clone Repository**
-   ```bash
-   git clone <repository-url>
-   cd e-vote2
+```bash
+# Clone repository
+git clone https://github.com/pindoyono/e-vote.git
+cd e-vote
+
+# Install dependencies
+npm install
+
+# Setup environment
+cp .env.example .env
+
+# Setup database
+npx prisma migrate dev --name init
+npx prisma generate
+
+# Seed initial data
+npx prisma db seed
+
+# Start development server
+npm run dev
+```
+
+**Akses aplikasi di http://localhost:3000**
    ```
 
 2. **Install Dependencies**
@@ -92,11 +119,17 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 ### Admin
 - **Username**: `admin`
 - **Password**: `admin123`
+- **Akses**: `/admin/login`
 
-### Kandidat (sudah tersedia)
-1. **Ahmad Rizki Pratama** (XII RPL 1)
-2. **Siti Nurhaliza** (XII TKJ 1) 
-3. **Muhammad Fajar Sidiq** (XII OTKP 1)
+### Committee (Panitia)
+- **Username**: `panitia`
+- **Password**: `panitia123`
+- **Akses**: `/committee/login`
+
+### Kandidat Default
+1. **Ahmad Rizki Pratama** (XII RPL 1) - Kandidat 1
+2. **Siti Nurhaliza** (XII TKJ 1) - Kandidat 2
+3. **Muhammad Fajar Sidiq** (XII OTKP 1) - Kandidat 3
 
 ## 📋 Panduan Penggunaan
 
@@ -104,38 +137,58 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 
 1. **Login ke Admin Panel**
    - Kunjungi `/admin/login`
-   - Masukkan username dan password
+   - Masukkan username: `admin` dan password: `admin123`
 
 2. **Mengelola Data Pemilih**
    - Buka menu "Data Pemilih"
-   - Tambah pemilih manual atau import CSV
-   - Format CSV: `Nama,Kelas,NISN` (tanpa header)
+   - **Tambah Manual**: Klik "Tambah Pemilih" dan isi form
+   - **Import CSV**: Upload file CSV dengan format `Nama,Kelas,NISN`
+   - **Export CSV**: Download template atau data pemilih
 
-3. **Verifikasi Pemilih**
+3. **Mengelola Kandidat**
+   - Buka menu "Kandidat"
+   - **Tambah Kandidat**: Klik "Tambah Kandidat"
+   - **Upload Foto**: Pilih foto kandidat (max 2MB, JPG/PNG)
+   - **Edit Kandidat**: Klik tombol edit untuk mengubah data
+   - **Hapus Kandidat**: Klik tombol hapus dengan konfirmasi
+
+4. **Verifikasi Pemilih**
    - Buka menu "Verifikasi"
    - Klik "Verifikasi" untuk mengonfirmasi data pemilih
-   - Salin URL voting yang dihasilkan
+   - Salin URL voting yang dihasilkan (format: `/vote/ABC12`)
    - Berikan URL kepada pemilih yang bersangkutan
 
-4. **Mengaktifkan Pemilihan**
+5. **Mengaktifkan Pemilihan**
    - Buka menu "Pengaturan"
    - Klik "Aktifkan Voting"
    - Pemilih dapat mulai voting setelah voting diaktifkan
 
-5. **Monitoring Hasil**
+6. **Monitoring Hasil**
    - Buka menu "Dashboard" untuk melihat hasil real-time
    - Atau kunjungi `/monitoring` untuk tampilan full-screen
+
+### Untuk Committee (Panitia)
+
+1. **Login Committee Panel**
+   - Kunjungi `/committee/login`
+   - Masukkan username: `panitia` dan password: `panitia123`
+
+2. **Verifikasi Pemilih**
+   - Akses halaman verifikasi
+   - Cari pemilih berdasarkan nama atau kelas
+   - Verifikasi data pemilih dan generate token voting
 
 ### Untuk Pemilih
 
 1. **Akses URL Voting**
    - Buka URL yang diberikan oleh panitia
-   - Format: `/vote/[token-unik]`
+   - Format: `/vote/[token-5-karakter]`
 
 2. **Melakukan Voting**
-   - Baca profil ketiga kandidat
-   - Pilih salah satu kandidat
-   - Konfirmasi pilihan (tidak dapat diubah)
+   - Lihat foto dan nomor urut ketiga kandidat
+   - Pilih salah satu kandidat dengan klik "PILIH"
+   - Konfirmasi pilihan dengan "SUBMIT SUARA"
+   - **Pilihan tidak dapat diubah setelah dikonfirmasi**
 
 3. **Konfirmasi**
    - Setelah voting, akan muncul halaman terima kasih
@@ -154,7 +207,13 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 ### Admin
 - `id`: String (Primary Key)
 - `username`: String (Unique)
-- `password`: String (Hashed)
+- `password`: String (Hashed with bcrypt)
+- `name`: String
+
+### Committee
+- `id`: String (Primary Key)
+- `username`: String (Unique)
+- `password`: String (Hashed with bcrypt)
 - `name`: String
 
 ### Voter
@@ -164,7 +223,7 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 - `nisn`: String (Unique)
 - `isVerified`: Boolean
 - `hasVoted`: Boolean
-- `voteToken`: String (Unique)
+- `voteToken`: String (Unique, 5 characters)
 
 ### Candidate
 - `id`: String (Primary Key)
@@ -172,6 +231,7 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 - `class`: String
 - `vision`: String
 - `mission`: String
+- `photo`: String (Path to uploaded image)
 - `orderNumber`: Integer (Unique)
 
 ### Vote
@@ -181,6 +241,7 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 - `voteToken`: String
 - `ipAddress`: String
 - `userAgent`: String
+- `createdAt`: DateTime
 
 ### VotingSession
 - `id`: String (Primary Key)
@@ -191,8 +252,9 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 ## 🔧 API Endpoints
 
 ### Authentication
-- `POST /api/auth/signin` - Login admin
-- `POST /api/auth/signout` - Logout admin
+- `POST /api/auth/signin` - Login admin/committee
+- `POST /api/auth/signout` - Logout
+- `GET /api/auth/session` - Get current session
 
 ### Admin APIs
 - `GET /api/admin/dashboard` - Dashboard statistics
@@ -201,10 +263,22 @@ Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 M
 - `PUT /api/admin/voters/[id]` - Update voter
 - `DELETE /api/admin/voters/[id]` - Delete voter
 - `POST /api/admin/voters/[id]/verify` - Verify voter
-- `GET/POST /api/admin/voting-session` - Manage voting session
+- `GET /api/admin/voters/unverified` - Get unverified voters
+- `POST /api/admin/voters/import` - Import voters from CSV
+- `GET /api/admin/voters/template` - Download CSV template
+
+### Candidate APIs
+- `GET /api/admin/candidates` - Get all candidates
+- `POST /api/admin/candidates` - Create candidate (with photo upload)
+- `PUT /api/admin/candidates/[id]` - Update candidate (with photo upload)
+- `DELETE /api/admin/candidates/[id]` - Delete candidate
+
+### Voting Session APIs
+- `GET /api/admin/voting-session` - Get voting session status
+- `POST /api/admin/voting-session` - Manage voting session
 
 ### Voting APIs
-- `GET /api/vote/[token]` - Get voting data
+- `GET /api/vote/[token]` - Get voting data (voter info + candidates)
 - `POST /api/vote/[token]/submit` - Submit vote
 - `GET /api/vote/[token]/status` - Get voter status
 
