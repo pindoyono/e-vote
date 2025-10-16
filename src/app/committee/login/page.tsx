@@ -134,16 +134,6 @@ export default function CommitteeLogin() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                            <p className="text-green-800 text-sm font-medium mb-1">
-                                Login Default Panitia:
-                            </p>
-                            <p className="text-green-700 text-sm">
-                                Username: <span className="font-semibold">panitia</span> |
-                                Password: <span className="font-semibold">panitia123</span>
-                            </p>
-                        </div>
-
                         <div className="flex items-center justify-center space-x-4 text-sm">
                             <Link
                                 href="/admin/login"

@@ -122,16 +122,6 @@ export default function AdminLogin() {
                     </form>
 
                     <div className="mt-6 text-center">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <p className="text-blue-800 text-sm font-medium mb-1">
-                                Login Default Administrator:
-                            </p>
-                            <p className="text-blue-700 text-sm">
-                                Username: <span className="font-semibold">admin</span> |
-                                Password: <span className="font-semibold">admin123</span>
-                            </p>
-                        </div>
-
                         <div className="flex items-center justify-center space-x-4 text-sm">
                             <Link
                                 href="/committee/login"

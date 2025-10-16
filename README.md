@@ -116,14 +116,12 @@ npm run dev
 
 ## 👥 Default Users
 
+⚠️ **Kredensial Login**: Untuk keamanan, kredensial default tidak ditampilkan di dokumentasi publik. Hubungi administrator sistem untuk mendapatkan akses login.
+
 ### Admin
-- **Username**: `admin`
-- **Password**: `admin123`
 - **Akses**: `/admin/login`
 
 ### Committee (Panitia)
-- **Username**: `panitia`
-- **Password**: `panitia123`
 - **Akses**: `/committee/login`
 
 ### Kandidat Default
@@ -137,7 +135,7 @@ npm run dev
 
 1. **Login ke Admin Panel**
    - Kunjungi `/admin/login`
-   - Masukkan username: `admin` dan password: `admin123`
+   - Masukkan kredensial admin yang telah diberikan oleh administrator sistem
 
 2. **Mengelola Data Pemilih**
    - Buka menu "Data Pemilih"
@@ -171,7 +169,7 @@ npm run dev
 
 1. **Login Committee Panel**
    - Kunjungi `/committee/login`
-   - Masukkan username: `panitia` dan password: `panitia123`
+   - Masukkan kredensial panitia yang telah diberikan oleh administrator sistem
 
 2. **Verifikasi Pemilih**
    - Akses halaman verifikasi

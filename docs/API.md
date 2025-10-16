@@ -8,8 +8,8 @@ POST /api/auth/signin
 Content-Type: application/json
 
 {
-  "username": "admin",
-  "password": "admin123"
+  "username": "your_admin_username",
+  "password": "your_admin_password"
 }
 ```
 
@@ -18,7 +18,7 @@ Content-Type: application/json
 {
   "user": {
     "id": "admin1",
-    "username": "admin",
+    "username": "your_username",
     "role": "admin"
   }
 }
@@ -39,7 +39,7 @@ GET /api/auth/session
 {
   "user": {
     "id": "admin1",
-    "username": "admin",
+    "username": "your_username",
     "role": "admin"
   }
 }

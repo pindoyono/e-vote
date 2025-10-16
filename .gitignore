@@ -33,6 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# credentials and sensitive files
+CREDENTIALS.txt
+credentials.txt
+PASSWORDS.txt
+passwords.txt
+
 # vercel
 .vercel
 
