@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
-import { CheckCircle, Users, School } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
+import { CheckCircle, Users, School, Home } from 'lucide-react'
 
 interface VoterInfo {
     name: string
@@ -12,6 +12,7 @@ interface VoterInfo {
 
 export default function ThankYouPage() {
     const params = useParams()
+    const router = useRouter()
     const [voter, setVoter] = useState<VoterInfo | null>(null)
     const [loading, setLoading] = useState(true)
     const voteToken = params.token as string
@@ -121,9 +122,18 @@ export default function ThankYouPage() {
                         <p className="text-gray-700 font-medium mb-2">
                             Hasil pemilihan akan diumumkan setelah pemilihan berakhir
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 mb-6">
                             Pantau terus pengumuman resmi dari sekolah
                         </p>
+
+                        {/* Button Kembali ke Halaman Utama */}
+                        <button
+                            onClick={() => router.push('/')}
+                            className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+                        >
+                            <Home className="w-5 h-5 mr-2" />
+                            Kembali ke Halaman Utama
+                        </button>
                     </div>
                 </div>
 
