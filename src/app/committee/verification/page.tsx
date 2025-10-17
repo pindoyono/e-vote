@@ -146,7 +146,7 @@ export default function CommitteeVerificationPage() {
                     <ol className="list-decimal list-inside text-sm text-green-800 space-y-1">
                         <li>Periksa identitas pemilih sesuai dengan data yang tertera</li>
                         <li>Pastikan nama, kelas, dan NISN sesuai dengan dokumen identitas</li>
-                        <li>Klik tombol "Verifikasi" untuk mengonfirmasi data pemilih</li>
+                        <li>Klik tombol &quot;Verifikasi&quot; untuk mengonfirmasi data pemilih</li>
                         <li>Sistem akan menghasilkan URL unik untuk voting</li>
                         <li>Bagikan URL tersebut kepada pemilih yang sudah terverifikasi</li>
                     </ol>
@@ -174,7 +174,7 @@ export default function CommitteeVerificationPage() {
                     </div>
                     {searchTerm && (
                         <div className="mt-2 text-sm text-green-600">
-                            Menampilkan {filteredVoters.length} hasil pencarian untuk "{searchTerm}"
+                            Menampilkan {filteredVoters.length} hasil pencarian untuk &quot;{searchTerm}&quot;
                         </div>
                     )}
                 </div>
@@ -230,6 +230,26 @@ export default function CommitteeVerificationPage() {
                                     </button>
                                 ) : (
                                     <div className="space-y-2">
+                                        {/* Token Display */}
+                                        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                            <p className="text-xs text-gray-500 mb-1">Token Pemilih:</p>
+                                            <div className="flex items-center justify-between">
+                                                <code className="text-sm font-mono font-semibold text-gray-900">
+                                                    {voter.voteToken}
+                                                </code>
+                                                <button
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(voter.voteToken!);
+                                                        alert('Token berhasil dicopy!');
+                                                    }}
+                                                    className="text-blue-600 hover:text-blue-700"
+                                                    title="Copy Token"
+                                                >
+                                                    <Copy className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+
                                         <button
                                             onClick={() => copyToClipboard(voter.voteToken!)}
                                             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg flex items-center justify-center transition-colors"
@@ -260,7 +280,7 @@ export default function CommitteeVerificationPage() {
                         </h3>
                         <p className="text-gray-600">
                             {searchTerm
-                                ? `Tidak ditemukan pemilih dengan kata kunci "${searchTerm}"`
+                                ? `Tidak ditemukan pemilih dengan kata kunci &quot;${searchTerm}&quot;`
                                 : 'Semua pemilih dalam database sudah melalui proses verifikasi'
                             }
                         </p>

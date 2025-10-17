@@ -4,8 +4,8 @@ module.exports = {
     script: 'npm',
     args: 'start',
     cwd: '/var/www/e-vote2',
-    instances: 'max',
-    exec_mode: 'cluster',
+    instances: 1,  // Single instance - Next.js handles its own clustering
+    exec_mode: 'fork',  // Fork mode, not cluster
     env: {
       NODE_ENV: 'production',
       PORT: 3000

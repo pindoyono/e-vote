@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import fs from 'fs'
+import path from 'path'
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
@@ -20,8 +22,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             const arrayBuffer = await file.arrayBuffer()
             const buffer = Buffer.from(arrayBuffer)
             const fileName = `/uploads/${Date.now()}-${file.name}`
-            const fs = require('fs')
-            const path = require('path')
 
             // Ensure uploads directory exists
             const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
@@ -38,7 +38,14 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         }
 
         // Prepare update data - only include photo if a new one was uploaded
-        const updateData: any = {
+        const updateData: {
+            name: string
+            class: string
+            vision: string
+            mission: string
+            orderNumber: number
+            photo?: string
+        } = {
             name,
             class: kelas,
             vision,

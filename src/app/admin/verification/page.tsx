@@ -218,8 +218,8 @@ export default function VerificationPage() {
                             onClick={resetAllVerifications}
                             disabled={resettingAll || verifiedVoters.length === 0}
                             className={`px-6 py-2 rounded-md flex items-center space-x-2 ${showConfirmResetAll
-                                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                                    : 'bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-300'
+                                ? 'bg-red-600 hover:bg-red-700 text-white'
+                                : 'bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-300'
                                 }`}
                         >
                             {resettingAll ? (
@@ -258,7 +258,7 @@ export default function VerificationPage() {
                     <h3 className="font-semibold text-blue-900 mb-2">Cara Verifikasi:</h3>
                     <ol className="list-decimal list-inside text-sm text-blue-800 space-y-1">
                         <li>Pastikan identitas pemilih sesuai dengan data yang valid</li>
-                        <li>Klik tombol "Verifikasi" untuk mengonfirmasi data pemilih</li>
+                        <li>Klik tombol &quot;Verifikasi&quot; untuk mengonfirmasi data pemilih</li>
                         <li>Sistem akan menggenerate URL unik untuk voting</li>
                         <li>Berikan URL tersebut kepada pemilih untuk melakukan voting</li>
                     </ol>
@@ -286,7 +286,7 @@ export default function VerificationPage() {
                     </div>
                     {searchTerm && (
                         <div className="mt-2 text-sm text-blue-600">
-                            Menampilkan {filteredVoters.length} hasil pencarian untuk "{searchTerm}"
+                            Menampilkan {filteredVoters.length} hasil pencarian untuk &quot;{searchTerm}&quot;
                         </div>
                     )}
                 </div>
@@ -324,28 +324,51 @@ export default function VerificationPage() {
                                     )}
 
                                     {voter.voteToken && (
-                                        <div className="mb-3">
-                                            <div className="text-xs text-gray-600 bg-gray-100 p-2 rounded">
+                                        <div className="space-y-2">
+                                            {/* Token Display */}
+                                            <div className="bg-white border border-green-300 rounded-lg p-3">
+                                                <p className="text-xs text-gray-600 mb-1 font-medium">Token Pemilih:</p>
+                                                <div className="flex items-center justify-between">
+                                                    <code className="text-sm font-mono font-bold text-green-700">
+                                                        {voter.voteToken}
+                                                    </code>
+                                                    <button
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(voter.voteToken!);
+                                                            alert('Token berhasil dicopy!');
+                                                        }}
+                                                        className="text-green-600 hover:text-green-700"
+                                                        title="Copy Token"
+                                                    >
+                                                        <Copy className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* URL Display */}
+                                            <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-200">
                                                 <span className="font-medium">Vote URL:</span>
                                                 <br />
-                                                <code className="break-all">
+                                                <code className="break-all text-gray-700">
                                                     /vote/{voter.voteToken}
                                                 </code>
                                             </div>
-                                            <div className="flex space-x-2 mt-2">
+
+                                            {/* Action Buttons */}
+                                            <div className="flex space-x-2">
                                                 <button
                                                     onClick={() => copyVoteUrl(voter.voteToken!)}
                                                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-1 px-2 rounded text-sm flex items-center justify-center"
                                                 >
                                                     <Copy className="h-3 w-3 mr-1" />
-                                                    Copy
+                                                    Copy URL
                                                 </button>
                                                 <button
                                                     onClick={() => window.open(`/vote/${voter.voteToken}`, '_blank')}
                                                     className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-1 px-2 rounded text-sm flex items-center justify-center"
                                                 >
                                                     <ExternalLink className="h-3 w-3 mr-1" />
-                                                    Open
+                                                    Buka
                                                 </button>
                                             </div>
                                         </div>

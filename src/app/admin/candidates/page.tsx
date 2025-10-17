@@ -53,7 +53,7 @@ export default function AdminCandidatesPage() {
     }
 
     const handleDelete = async (c: Candidate) => {
-        if (!confirm(`Hapus kandidat "${c.name}"? Tindakan ini tidak dapat dibatalkan.`)) return
+        if (!confirm(`Hapus kandidat &quot;${c.name}&quot;? Tindakan ini tidak dapat dibatalkan.`)) return
         try {
             const res = await fetch(`/api/admin/candidates/${c.id}`, { method: 'DELETE' })
             if (!res.ok) throw new Error('Gagal menghapus kandidat')
@@ -112,7 +112,7 @@ export default function AdminCandidatesPage() {
                     ) : candidates.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="text-lg text-gray-600 mb-2">Belum ada kandidat</div>
-                            <div className="text-sm text-gray-500">Klik "Tambah Kandidat" untuk menambahkan kandidat pertama</div>
+                            <div className="text-sm text-gray-500">Klik &quot;Tambah Kandidat&quot; untuk menambahkan kandidat pertama</div>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -201,9 +201,12 @@ export default function AdminCandidatesPage() {
                                     // clear file input and preview
                                     if (fileInputRef.current) fileInputRef.current.value = ''
                                     setPreview(null)
-                                } catch (err: any) {
+                                } catch (err: unknown) {
                                     console.error(err)
-                                    setFormError(err?.message ?? 'Gagal menyimpan kandidat')
+                                    const errorMessage = err && typeof err === 'object' && 'message' in err
+                                        ? String(err.message)
+                                        : 'Gagal menyimpan kandidat'
+                                    setFormError(errorMessage)
                                 } finally {
                                     setSubmitting(false)
                                 }

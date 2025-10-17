@@ -108,8 +108,8 @@ export default function MonitoringPage() {
                     <button
                         onClick={() => setAutoRefresh(!autoRefresh)}
                         className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${autoRefresh
-                                ? 'bg-green-600 hover:bg-green-700'
-                                : 'bg-gray-600 hover:bg-gray-700'
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : 'bg-gray-600 hover:bg-gray-700'
                             }`}
                     >
                         <RefreshCw className={`h-4 w-4 mr-2 ${autoRefresh ? 'animate-spin' : ''}`} />
@@ -180,7 +180,7 @@ export default function MonitoringPage() {
                             <XAxis
                                 dataKey="orderNumber"
                                 stroke="#9CA3AF"
-                                formatter={(value) => `Kandidat ${value}`}
+                                tickFormatter={(value) => `Kandidat ${value}`}
                             />
                             <YAxis stroke="#9CA3AF" />
                             <Tooltip
@@ -211,7 +211,9 @@ export default function MonitoringPage() {
                                 outerRadius={80}
                                 fill="#8884d8"
                                 dataKey="voteCount"
-                                label={({ name, percentage }) => `${name.split(' ')[0]} (${percentage.toFixed(1)}%)`}
+                                label={({ name, percentage }: { name?: string; percentage?: number }) =>
+                                    name && percentage ? `${name.split(' ')[0]} (${percentage.toFixed(1)}%)` : ''
+                                }
                             >
                                 {stats.candidates.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

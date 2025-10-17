@@ -235,7 +235,7 @@ export default function VotersPage() {
                     </div>
                     {searchTerm && (
                         <div className="mt-2 text-sm text-blue-600">
-                            Menampilkan {filteredVoters.length} dari {voters.length} pemilih untuk "{searchTerm}"
+                            Menampilkan {filteredVoters.length} dari {voters.length} pemilih untuk &quot;{searchTerm}&quot;
                         </div>
                     )}
                 </div>

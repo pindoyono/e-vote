@@ -154,7 +154,7 @@ export default function VotingPage() {
                     <h3 className="text-xl font-semibold text-white mb-4">Petunjuk Voting:</h3>
                     <ol className="list-decimal list-inside text-blue-100 space-y-2">
                         <li>Baca dengan teliti profil setiap kandidat</li>
-                        <li>Pilih salah satu kandidat dengan mengklik tombol "PILIH"</li>
+                        <li>Pilih salah satu kandidat dengan mengklik tombol &quot;PILIH&quot;</li>
                         <li>Konfirmasi pilihan Anda</li>
                         <li>Pilihan tidak dapat diubah setelah dikonfirmasi</li>
                     </ol>

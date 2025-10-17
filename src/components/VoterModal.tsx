@@ -35,10 +35,11 @@ export default function VoterModal({ isOpen, onClose, onSave, voter }: VoterModa
             await onSave(validatedData)
             onClose()
             setFormData({ name: '', class: '', nisn: '' })
-        } catch (error: any) {
-            if (error.errors) {
+        } catch (error: unknown) {
+            if (error && typeof error === 'object' && 'errors' in error) {
+                const zodError = error as { errors: Array<{ path: string[]; message: string }> }
                 const fieldErrors: Record<string, string> = {}
-                error.errors.forEach((err: any) => {
+                zodError.errors.forEach((err) => {
                     fieldErrors[err.path[0]] = err.message
                 })
                 setErrors(fieldErrors)

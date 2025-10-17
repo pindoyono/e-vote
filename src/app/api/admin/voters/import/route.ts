@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'File CSV kosong' }, { status: 400 })
         }
 
-        const voters = []
-        const errors = []
+        const voters: Array<{ name: string; class: string; nisn: string }> = []
+        const errors: string[] = []
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim()
@@ -103,12 +103,12 @@ export async function POST(request: NextRequest) {
                             data: voter
                         })
                         importedCount++
-                    } catch (createError: any) {
+                    } catch (createError: unknown) {
                         // Jika duplikasi, tambahkan ke error
-                        if (createError.code === 'P2002') {
+                        if (createError && typeof createError === 'object' && 'code' in createError && createError.code === 'P2002') {
                             errors.push(`NISN ${voter.nisn} sudah ada dalam database`)
                         } else {
-                            errors.push(`Gagal menyimpan ${voter.name}: ${createError.message}`)
+                            errors.push(`Gagal mengimpor NISN ${voter.nisn}`)
                         }
                     }
                 }

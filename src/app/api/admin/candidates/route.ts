@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import fs from 'fs'
+import path from 'path'
 
 export async function GET() {
     try {
@@ -26,8 +28,6 @@ export async function POST(request: Request) {
             const arrayBuffer = await file.arrayBuffer()
             const buffer = Buffer.from(arrayBuffer)
             const fileName = `/uploads/${Date.now()}-${file.name}`
-            const fs = require('fs')
-            const path = require('path')
             const fullPath = path.join(process.cwd(), 'public', fileName)
             fs.writeFileSync(fullPath, buffer)
             photoPath = fileName
