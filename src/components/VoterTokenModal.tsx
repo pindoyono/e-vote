@@ -103,7 +103,7 @@ export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProp
                             }}
                             maxLength={5}
                             placeholder="ABC12"
-                            className="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-center text-3xl font-mono font-bold tracking-widest shadow-sm"
+                            className="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-center text-3xl font-mono font-bold tracking-widest shadow-sm text-gray-900 bg-white placeholder:text-gray-400"
                             disabled={loading}
                             autoFocus
                         />
