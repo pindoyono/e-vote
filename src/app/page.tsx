@@ -1,7 +1,13 @@
+'use client'
+
 import Link from 'next/link'
 import { Vote, Users, BarChart3, Shield } from 'lucide-react'
+import { useState } from 'react'
+import VoterTokenModal from '@/components/VoterTokenModal'
 
 export default function HomePage() {
+    const [isModalOpen, setIsModalOpen] = useState(false)
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
             {/* Hero Section */}
@@ -73,17 +79,24 @@ export default function HomePage() {
                             <Users className="h-5 w-5" />
                             <span>Portal Panitia</span>
                         </Link>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
+                        >
+                            <Vote className="h-5 w-5" />
+                            <span>Portal Pemilih</span>
+                        </button>
                         <Link
                             href="/monitoring"
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2 sm:col-span-2 lg:col-span-3"
                         >
                             <BarChart3 className="h-5 w-5" />
-                            <span>Monitoring</span>
+                            <span>Monitoring Hasil</span>
                         </Link>
                     </div>
 
                     {/* Role Description */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                             <h4 className="text-lg font-semibold text-white mb-2">Administrator</h4>
                             <p className="text-blue-200 text-sm">
@@ -94,6 +107,12 @@ export default function HomePage() {
                             <h4 className="text-lg font-semibold text-white mb-2">Panitia</h4>
                             <p className="text-blue-200 text-sm">
                                 Verifikasi pemilih dan generate URL voting untuk siswa
+                            </p>
+                        </div>
+                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+                            <h4 className="text-lg font-semibold text-white mb-2">Pemilih</h4>
+                            <p className="text-blue-200 text-sm">
+                                Masukkan token untuk akses halaman voting dan pilih kandidat
                             </p>
                         </div>
                     </div>
@@ -120,6 +139,12 @@ export default function HomePage() {
                     </div>
                 </div>
             </div>
+
+            {/* Voter Token Modal */}
+            <VoterTokenModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
         </div>
     )
 }
