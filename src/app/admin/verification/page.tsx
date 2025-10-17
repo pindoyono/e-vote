@@ -178,7 +178,7 @@ export default function VerificationPage() {
 
     const verifyAllVoters = async () => {
         const unverifiedList = voters.filter(v => !v.isVerified)
-        
+
         if (unverifiedList.length === 0) {
             alert('Semua pemilih sudah diverifikasi!')
             return
@@ -190,7 +190,7 @@ export default function VerificationPage() {
         }
 
         setVerifyingAll(true)
-        
+
         try {
             let successCount = 0
             let failCount = 0

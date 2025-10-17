@@ -100,7 +100,7 @@ export default function CommitteeVerificationPage() {
 
     const verifyAllVoters = async () => {
         const unverifiedVoters = voters.filter(v => !v.isVerified)
-        
+
         if (unverifiedVoters.length === 0) {
             alert('Semua pemilih sudah diverifikasi!')
             return
@@ -112,7 +112,7 @@ export default function CommitteeVerificationPage() {
         }
 
         setVerifyingAll(true)
-        
+
         try {
             let successCount = 0
             let failCount = 0
@@ -186,7 +186,7 @@ export default function CommitteeVerificationPage() {
                             </div>
                         </div>
                     </div>
-                    
+
                     {/* Verify All Button */}
                     {voters.filter(v => !v.isVerified).length > 0 && (
                         <div className="pt-4 border-t border-gray-200">
