@@ -19,6 +19,7 @@ export default function VerificationPage() {
     const [loading, setLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [verifyingId, setVerifyingId] = useState<string | null>(null)
+    const [verifyingAll, setVerifyingAll] = useState(false)
     const [resettingId, setResettingId] = useState<string | null>(null)
     const [resettingAll, setResettingAll] = useState(false)
     const [showConfirmResetAll, setShowConfirmResetAll] = useState(false)
@@ -175,6 +176,55 @@ export default function VerificationPage() {
         }
     }
 
+    const verifyAllVoters = async () => {
+        const unverifiedList = voters.filter(v => !v.isVerified)
+        
+        if (unverifiedList.length === 0) {
+            alert('Semua pemilih sudah diverifikasi!')
+            return
+        }
+
+        const confirmMessage = `Anda akan memverifikasi ${unverifiedList.length} pemilih sekaligus.\n\nApakah Anda yakin?`
+        if (!confirm(confirmMessage)) {
+            return
+        }
+
+        setVerifyingAll(true)
+        
+        try {
+            let successCount = 0
+            let failCount = 0
+
+            // Verifikasi satu per satu
+            for (const voter of unverifiedList) {
+                try {
+                    const response = await fetch(`/api/admin/voters/${voter.id}/verify`, {
+                        method: 'POST',
+                    })
+
+                    if (response.ok) {
+                        successCount++
+                    } else {
+                        failCount++
+                    }
+                } catch (error) {
+                    failCount++
+                    console.error(`Error verifying ${voter.name}:`, error)
+                }
+            }
+
+            // Refresh data
+            await fetchUnverifiedVoters()
+
+            alert(`Verifikasi selesai!\n\nBerhasil: ${successCount}\nGagal: ${failCount}`)
+        } catch (error) {
+            console.error('Error in bulk verification:', error)
+            alert('Terjadi kesalahan saat verifikasi massal')
+        } finally {
+            setVerifyingAll(false)
+        }
+    }
+
     const filteredVoters = voters.filter(voter =>
         voter.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         voter.class.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -198,48 +248,76 @@ export default function VerificationPage() {
         <AdminLayout>
             <div className="space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Verifikasi Pemilih</h1>
-                        <div className="text-sm text-gray-600 mt-1">
-                            {unverifiedVoters.length} belum diverifikasi • {verifiedVoters.length} sudah diverifikasi
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-gray-900">Verifikasi Pemilih</h1>
+                            <div className="text-sm text-gray-600 mt-1">
+                                {unverifiedVoters.length} belum diverifikasi • {verifiedVoters.length} sudah diverifikasi
+                            </div>
+                        </div>
+                        <div className="flex space-x-4">
+                            {showConfirmResetAll && (
+                                <button
+                                    onClick={() => setShowConfirmResetAll(false)}
+                                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                >
+                                    Batal
+                                </button>
+                            )}
+                            <button
+                                onClick={resetAllVerifications}
+                                disabled={resettingAll || verifiedVoters.length === 0}
+                                className={`px-6 py-2 rounded-md flex items-center space-x-2 ${showConfirmResetAll
+                                    ? 'bg-red-600 hover:bg-red-700 text-white'
+                                    : 'bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-300'
+                                    }`}
+                            >
+                                {resettingAll ? (
+                                    <>
+                                        <RotateCcw className="w-4 h-4 animate-spin" />
+                                        <span>Mereset...</span>
+                                    </>
+                                ) : showConfirmResetAll ? (
+                                    <>
+                                        <AlertTriangle className="w-4 h-4" />
+                                        <span>Konfirmasi Reset</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <RotateCcw className="w-4 h-4" />
+                                        <span>Reset Semua Verifikasi</span>
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
-                    <div className="flex space-x-4">
-                        {showConfirmResetAll && (
+
+                    {/* Verify All Button */}
+                    {unverifiedVoters.length > 0 && (
+                        <div className="pt-4 border-t border-gray-200">
                             <button
-                                onClick={() => setShowConfirmResetAll(false)}
-                                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                onClick={verifyAllVoters}
+                                disabled={verifyingAll}
+                                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white py-3 px-6 rounded-lg flex items-center justify-center transition-colors font-semibold shadow-lg"
                             >
-                                Batal
+                                {verifyingAll ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                        Memverifikasi {unverifiedVoters.length} pemilih...
+                                    </>
+                                ) : (
+                                    <>
+                                        <UserCheck className="h-5 w-5 mr-2" />
+                                        Verifikasi Semua ({unverifiedVoters.length} Pemilih)
+                                    </>
+                                )}
                             </button>
-                        )}
-                        <button
-                            onClick={resetAllVerifications}
-                            disabled={resettingAll || verifiedVoters.length === 0}
-                            className={`px-6 py-2 rounded-md flex items-center space-x-2 ${showConfirmResetAll
-                                ? 'bg-red-600 hover:bg-red-700 text-white'
-                                : 'bg-orange-600 hover:bg-orange-700 text-white disabled:bg-gray-300'
-                                }`}
-                        >
-                            {resettingAll ? (
-                                <>
-                                    <RotateCcw className="w-4 h-4 animate-spin" />
-                                    <span>Mereset...</span>
-                                </>
-                            ) : showConfirmResetAll ? (
-                                <>
-                                    <AlertTriangle className="w-4 h-4" />
-                                    <span>Konfirmasi Reset</span>
-                                </>
-                            ) : (
-                                <>
-                                    <RotateCcw className="w-4 h-4" />
-                                    <span>Reset Semua Verifikasi</span>
-                                </>
-                            )}
-                        </button>
-                    </div>
+                            <p className="text-xs text-gray-500 text-center mt-2">
+                                Verifikasi semua pemilih yang belum terverifikasi sekaligus
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {showConfirmResetAll && (
