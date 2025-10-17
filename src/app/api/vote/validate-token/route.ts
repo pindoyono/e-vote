@@ -22,7 +22,7 @@ export async function POST(request: Request) {
 
         // Find voter with this token
         const voter = await prisma.voter.findUnique({
-            where: { voteToken: token.toUpperCase() }
+            where: { voteToken: token }
         })
 
         if (!voter) {
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             valid: true,
             message: 'Token valid',
-            voteUrl: `/vote/${token.toUpperCase()}`
+            voteUrl: `/vote/${token}`
         })
 
     } catch (error) {
