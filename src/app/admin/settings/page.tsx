@@ -35,6 +35,13 @@ export default function SettingsPage() {
     const [eventYear, setEventYear] = useState('')
     const [savingConfig, setSavingConfig] = useState(false)
 
+    // Theme state
+    const [themePrimary, setThemePrimary] = useState('#1e40af')
+    const [themeSecondary, setThemeSecondary] = useState('#3b82f6')
+    const [themeAccent, setThemeAccent] = useState('#eab308')
+    const [themeSuccess, setThemeSuccess] = useState('#16a34a')
+    const [savingTheme, setSavingTheme] = useState(false)
+
     const fetchData = async () => {
         try {
             const [sessionRes, statsRes, configRes] = await Promise.all([
@@ -57,6 +64,12 @@ export default function SettingsPage() {
             setSchoolShortName(configData.schoolShortName || 'SMK N2 Malinau')
             setEventTitle(configData.eventTitle || 'Pemilihan Ketua OSIS')
             setEventYear(configData.eventYear || '2025')
+
+            // Set theme values
+            setThemePrimary(configData.themePrimary || '#1e40af')
+            setThemeSecondary(configData.themeSecondary || '#3b82f6')
+            setThemeAccent(configData.themeAccent || '#eab308')
+            setThemeSuccess(configData.themeSuccess || '#16a34a')
         } catch (error) {
             console.error('Error fetching data:', error)
         } finally {
@@ -154,6 +167,51 @@ export default function SettingsPage() {
         } finally {
             setSavingConfig(false)
         }
+    }
+
+    const saveTheme = async () => {
+        setSavingTheme(true)
+        try {
+            const response = await fetch('/api/admin/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    themePrimary,
+                    themeSecondary,
+                    themeAccent,
+                    themeSuccess
+                })
+            })
+
+            if (response.ok) {
+                alert('Tema berhasil disimpan! Refresh halaman untuk melihat perubahan.')
+                // Apply theme immediately
+                applyTheme()
+            } else {
+                alert('Gagal menyimpan tema')
+            }
+        } catch (error) {
+            console.error('Save theme error:', error)
+            alert('Terjadi kesalahan saat menyimpan tema')
+        } finally {
+            setSavingTheme(false)
+        }
+    }
+
+    const applyTheme = () => {
+        document.documentElement.style.setProperty('--color-primary', themePrimary)
+        document.documentElement.style.setProperty('--color-secondary', themeSecondary)
+        document.documentElement.style.setProperty('--color-accent', themeAccent)
+        document.documentElement.style.setProperty('--color-success', themeSuccess)
+    }
+
+    const resetTheme = () => {
+        setThemePrimary('#1e40af')
+        setThemeSecondary('#3b82f6')
+        setThemeAccent('#eab308')
+        setThemeSuccess('#16a34a')
     }
 
     if (loading) {
@@ -257,6 +315,152 @@ export default function SettingsPage() {
                                 '💾 Simpan Konfigurasi'
                             )}
                         </button>
+                    </div>
+                </div>
+
+                {/* Theme Config - NEW */}
+                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8 mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <svg className="h-7 w-7 mr-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                        Konfigurasi Tema Warna
+                    </h2>
+
+                    <p className="text-gray-600 mb-6">
+                        Sesuaikan palet warna aplikasi sesuai identitas sekolah Anda. Perubahan akan diterapkan ke seluruh sistem.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                🔵 Warna Primer (Primary)
+                            </label>
+                            <div className="flex items-center space-x-3">
+                                <input
+                                    type="color"
+                                    value={themePrimary}
+                                    onChange={(e) => setThemePrimary(e.target.value)}
+                                    className="h-12 w-20 rounded-lg border-2 border-gray-300 cursor-pointer"
+                                />
+                                <input
+                                    type="text"
+                                    value={themePrimary}
+                                    onChange={(e) => setThemePrimary(e.target.value)}
+                                    placeholder="#1e40af"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-mono"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Digunakan untuk header, tombol utama, dan elemen penting</p>
+                            <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: themePrimary }}>
+                                <p className="text-white font-semibold text-center">Preview Primary</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                🟦 Warna Sekunder (Secondary)
+                            </label>
+                            <div className="flex items-center space-x-3">
+                                <input
+                                    type="color"
+                                    value={themeSecondary}
+                                    onChange={(e) => setThemeSecondary(e.target.value)}
+                                    className="h-12 w-20 rounded-lg border-2 border-gray-300 cursor-pointer"
+                                />
+                                <input
+                                    type="text"
+                                    value={themeSecondary}
+                                    onChange={(e) => setThemeSecondary(e.target.value)}
+                                    placeholder="#3b82f6"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-mono"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Digunakan untuk elemen pelengkap dan gradien</p>
+                            <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: themeSecondary }}>
+                                <p className="text-white font-semibold text-center">Preview Secondary</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                🟨 Warna Aksen (Accent)
+                            </label>
+                            <div className="flex items-center space-x-3">
+                                <input
+                                    type="color"
+                                    value={themeAccent}
+                                    onChange={(e) => setThemeAccent(e.target.value)}
+                                    className="h-12 w-20 rounded-lg border-2 border-gray-300 cursor-pointer"
+                                />
+                                <input
+                                    type="text"
+                                    value={themeAccent}
+                                    onChange={(e) => setThemeAccent(e.target.value)}
+                                    placeholder="#eab308"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-mono"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Digunakan untuk highlight dan elemen yang ingin ditonjolkan</p>
+                            <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: themeAccent }}>
+                                <p className="text-white font-semibold text-center">Preview Accent</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                🟩 Warna Sukses (Success)
+                            </label>
+                            <div className="flex items-center space-x-3">
+                                <input
+                                    type="color"
+                                    value={themeSuccess}
+                                    onChange={(e) => setThemeSuccess(e.target.value)}
+                                    className="h-12 w-20 rounded-lg border-2 border-gray-300 cursor-pointer"
+                                />
+                                <input
+                                    type="text"
+                                    value={themeSuccess}
+                                    onChange={(e) => setThemeSuccess(e.target.value)}
+                                    placeholder="#16a34a"
+                                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 font-mono"
+                                />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">Digunakan untuk indikator sukses, konfirmasi, dan status aktif</p>
+                            <div className="mt-2 p-3 rounded-lg" style={{ backgroundColor: themeSuccess }}>
+                                <p className="text-white font-semibold text-center">Preview Success</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-gray-200 flex space-x-4">
+                        <button
+                            onClick={saveTheme}
+                            disabled={savingTheme}
+                            className="flex-1 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white py-3 px-6 rounded-lg font-semibold text-lg transition-colors"
+                        >
+                            {savingTheme ? (
+                                <div className="flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                    Menyimpan...
+                                </div>
+                            ) : (
+                                '🎨 Simpan Tema'
+                            )}
+                        </button>
+                        <button
+                            onClick={resetTheme}
+                            className="bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold text-lg transition-colors"
+                        >
+                            🔄 Reset ke Default
+                        </button>
+                    </div>
+
+                    <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p className="text-blue-800 text-sm">
+                            💡 <strong>Tips:</strong> Klik pada kotak warna untuk memilih warna dengan color picker, atau masukkan kode hex secara manual.
+                            Refresh halaman setelah menyimpan untuk melihat perubahan tema di seluruh aplikasi.
+                        </p>
                     </div>
                 </div>
 

@@ -3,6 +3,12 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Theme Colors - Default values, will be overridden by ThemeProvider */
+  --color-primary: #1e40af;
+  --color-secondary: #3b82f6;
+  --color-accent: #eab308;
+  --color-success: #16a34a;
 }
 
 @theme inline {
