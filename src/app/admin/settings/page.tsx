@@ -28,18 +28,35 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
 
+    // Config state
+    const [schoolName, setSchoolName] = useState('')
+    const [schoolShortName, setSchoolShortName] = useState('')
+    const [eventTitle, setEventTitle] = useState('')
+    const [eventYear, setEventYear] = useState('')
+    const [savingConfig, setSavingConfig] = useState(false)
+
     const fetchData = async () => {
         try {
-            const [sessionRes, statsRes] = await Promise.all([
+            const [sessionRes, statsRes, configRes] = await Promise.all([
                 fetch('/api/admin/voting-session'),
-                fetch('/api/admin/dashboard')
+                fetch('/api/admin/dashboard'),
+                fetch('/api/admin/config')
             ])
 
-            const sessionData = await sessionRes.json()
-            const statsData = await statsRes.json()
+            const [sessionData, statsData, configData] = await Promise.all([
+                sessionRes.json(),
+                statsRes.json(),
+                configRes.json()
+            ])
 
             setSession(sessionData)
             setStats(statsData)
+
+            // Set config values
+            setSchoolName(configData.schoolName || 'SMK Negeri 2 Malinau')
+            setSchoolShortName(configData.schoolShortName || 'SMK N2 Malinau')
+            setEventTitle(configData.eventTitle || 'Pemilihan Ketua OSIS')
+            setEventYear(configData.eventYear || '2025')
         } catch (error) {
             console.error('Error fetching data:', error)
         } finally {
@@ -79,7 +96,7 @@ export default function SettingsPage() {
     }
 
     const resetVoting = async () => {
-        if (!confirm('Yakin ingin mereset semua data voting? Tindakan ini tidak dapat dibatalkan!')) {
+        if (!confirm('Yakin ingin mereset semua data voting? Tindakan ini tidak dapat di batalkan!')) {
             return
         }
 
@@ -103,6 +120,42 @@ export default function SettingsPage() {
         }
     }
 
+    const saveConfig = async () => {
+        if (!schoolName.trim() || !schoolShortName.trim() || !eventTitle.trim() || !eventYear.trim()) {
+            alert('Semua field harus diisi!')
+            return
+        }
+
+        setSavingConfig(true)
+        try {
+            const response = await fetch('/api/admin/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    schoolName,
+                    schoolShortName,
+                    eventTitle,
+                    eventYear
+                })
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                alert('Konfigurasi berhasil disimpan!')
+            } else {
+                alert('Gagal menyimpan konfigurasi')
+            }
+        } catch (error) {
+            console.error('Save config error:', error)
+            alert('Terjadi kesalahan saat menyimpan konfigurasi')
+        } finally {
+            setSavingConfig(false)
+        }
+    }
+
     if (loading) {
         return (
             <AdminLayout>
@@ -120,8 +173,91 @@ export default function SettingsPage() {
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">Pengaturan Sistem</h1>
                     <p className="text-lg text-gray-600">
-                        Kelola pengaturan dan kontrol sistem e-voting
+                        Kelola pengaturan sistem e-voting
                     </p>
+                </div>
+
+                {/* School Config - NEW */}
+                <div className="bg-white rounded-xl shadow-md border border-gray-200 p-8 mb-8">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                        <Settings className="h-7 w-7 mr-3 text-blue-600" />
+                        Konfigurasi Sekolah & Event
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Nama Sekolah (Lengkap)
+                            </label>
+                            <input
+                                type="text"
+                                value={schoolName}
+                                onChange={(e) => setSchoolName(e.target.value)}
+                                placeholder="Contoh: SMK Negeri 2 Malinau"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Nama lengkap sekolah untuk tampil di seluruh sistem</p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Nama Singkat (Untuk Header)
+                            </label>
+                            <input
+                                type="text"
+                                value={schoolShortName}
+                                onChange={(e) => setSchoolShortName(e.target.value)}
+                                placeholder="Contoh: SMK N2 Malinau"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Nama singkat untuk header dan judul</p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Nama Event / Pemilihan
+                            </label>
+                            <input
+                                type="text"
+                                value={eventTitle}
+                                onChange={(e) => setEventTitle(e.target.value)}
+                                placeholder="Contoh: Pemilihan Ketua OSIS"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Nama event/pemilihan yang sedang berlangsung</p>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Tahun Event
+                            </label>
+                            <input
+                                type="text"
+                                value={eventYear}
+                                onChange={(e) => setEventYear(e.target.value)}
+                                placeholder="Contoh: 2025"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Tahun pelaksanaan event</p>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                        <button
+                            onClick={saveConfig}
+                            disabled={savingConfig}
+                            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-3 px-6 rounded-lg font-semibold text-lg transition-colors"
+                        >
+                            {savingConfig ? (
+                                <div className="flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                    Menyimpan...
+                                </div>
+                            ) : (
+                                '💾 Simpan Konfigurasi'
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Voting Control */}
