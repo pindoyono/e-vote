@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ReactNode } from 'react'
+import { ReactNode, useState, useEffect } from 'react'
 import {
     Users,
     UserCheck,
@@ -14,7 +14,6 @@ import {
     X,
     RotateCcw
 } from 'lucide-react'
-import { useState } from 'react'
 
 interface AdminLayoutProps {
     children: ReactNode
@@ -33,6 +32,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const { data: session } = useSession()
     const pathname = usePathname()
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [config, setConfig] = useState({
+        schoolShortName: 'SMK N2 Malinau',
+        eventTitle: 'Pemilihan Ketua OSIS',
+        eventYear: '2025'
+    })
+
+    useEffect(() => {
+        fetch('/api/admin/config')
+            .then(res => res.json())
+            .then(data => {
+                setConfig({
+                    schoolShortName: data.schoolShortName || 'SMK N2 Malinau',
+                    eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
+                    eventYear: data.eventYear || '2025'
+                })
+            })
+            .catch(err => console.error('Failed to load config:', err))
+    }, [])
 
     return (
         <div className="min-h-screen bg-gray-50 flex">
@@ -113,7 +130,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
                         <div className="flex-1 lg:ml-0">
                             <h1 className="text-lg font-semibold text-gray-900">
-                                SMK Negeri 2 Malinau - Pemilihan Ketua OSIS 2025
+                                {config.schoolShortName} - {config.eventTitle} {config.eventYear}
                             </h1>
                         </div>
                     </div>

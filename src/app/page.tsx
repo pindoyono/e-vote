@@ -2,11 +2,30 @@
 
 import Link from 'next/link'
 import { Vote, Users, BarChart3, Shield } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import VoterTokenModal from '@/components/VoterTokenModal'
 
 export default function HomePage() {
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [config, setConfig] = useState({
+        schoolName: 'SMK Negeri 2 Malinau',
+        eventTitle: 'Pemilihan Ketua OSIS',
+        eventYear: '2025'
+    })
+
+    useEffect(() => {
+        // Fetch config from API
+        fetch('/api/admin/config')
+            .then(res => res.json())
+            .then(data => {
+                setConfig({
+                    schoolName: data.schoolName || 'SMK Negeri 2 Malinau',
+                    eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
+                    eventYear: data.eventYear || '2025'
+                })
+            })
+            .catch(err => console.error('Failed to load config:', err))
+    }, [])
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
@@ -25,16 +44,16 @@ export default function HomePage() {
                         E-VOTE
                     </h1>
                     <h2 className="text-2xl md:text-3xl font-semibold text-blue-200 mb-6">
-                        Pemilihan Ketua OSIS
+                        {config.eventTitle}
                     </h2>
                     <h3 className="text-xl md:text-2xl text-blue-300 mb-8">
-                        SMK Negeri 2 Malinau
+                        {config.schoolName}
                     </h3>
 
                     {/* Description */}
                     <p className="text-lg text-blue-100 mb-12 max-w-2xl mx-auto leading-relaxed">
                         Sistem pemilihan elektronik yang aman, transparan, dan modern untuk
-                        memilih ketua OSIS periode 2025. Setiap suara berharga dan akan dihitung
+                        memilih ketua OSIS periode {config.eventYear}. Setiap suara berharga dan akan dihitung
                         dengan akurat.
                     </p>
 

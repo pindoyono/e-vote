@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
     Users,
     UserCheck,
@@ -20,6 +20,22 @@ interface CommitteeLayoutProps {
 export default function CommitteeLayout({ children }: CommitteeLayoutProps) {
     const { data: session, status } = useSession()
     const router = useRouter()
+    const [config, setConfig] = useState({
+        schoolShortName: 'SMK N2 Malinau',
+        eventYear: '2025'
+    })
+
+    useEffect(() => {
+        fetch('/api/admin/config')
+            .then(res => res.json())
+            .then(data => {
+                setConfig({
+                    schoolShortName: data.schoolShortName || 'SMK N2 Malinau',
+                    eventYear: data.eventYear || '2025'
+                })
+            })
+            .catch(err => console.error('Failed to load config:', err))
+    }, [])
 
     useEffect(() => {
         if (status === 'unauthenticated') {
@@ -64,7 +80,7 @@ export default function CommitteeLayout({ children }: CommitteeLayoutProps) {
                                     Portal Panitia
                                 </h1>
                                 <p className="text-green-100 text-xs">
-                                    SMK Negeri 2 Malinau
+                                    {config.schoolShortName}
                                 </p>
                             </div>
                         </div>
@@ -156,7 +172,7 @@ export default function CommitteeLayout({ children }: CommitteeLayoutProps) {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div className="flex justify-between items-center">
                         <p className="text-gray-600 text-sm">
-                            © 2025 SMK Negeri 2 Malinau - Portal Panitia E-Vote
+                            © {config.eventYear} {config.schoolShortName} - Portal Panitia E-Vote
                         </p>
                         <div className="flex items-center space-x-4 text-sm">
                             <span className="text-green-600 font-medium">
