@@ -10,12 +10,45 @@ interface VoterInfo {
     hasVoted: boolean
 }
 
+interface Config {
+    schoolName: string
+    schoolShortName: string
+    eventTitle: string
+    eventYear: string
+}
+
 export default function ThankYouPage() {
     const params = useParams()
     const router = useRouter()
     const [voter, setVoter] = useState<VoterInfo | null>(null)
     const [loading, setLoading] = useState(true)
+    const [config, setConfig] = useState<Config>({
+        schoolName: 'SMK Negeri 2 Malinau',
+        schoolShortName: 'SMKN 2 Malinau',
+        eventTitle: 'Pemilihan Ketua OSIS',
+        eventYear: '2025'
+    })
     const voteToken = params.token as string
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const response = await fetch('/api/admin/config')
+                if (response.ok) {
+                    const data = await response.json()
+                    setConfig({
+                        schoolName: data.schoolName || 'SMK Negeri 2 Malinau',
+                        schoolShortName: data.schoolShortName || 'SMKN 2 Malinau',
+                        eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
+                        eventYear: data.eventYear || '2025'
+                    })
+                }
+            } catch (error) {
+                console.error('Error fetching config:', error)
+            }
+        }
+        fetchConfig()
+    }, [])
 
     useEffect(() => {
         const fetchVoterInfo = async () => {
@@ -81,7 +114,7 @@ export default function ThankYouPage() {
                     <p className="text-green-100 text-lg leading-relaxed">
                         Anda telah berhasil berpartisipasi dalam{' '}
                         <span className="font-semibold text-yellow-300">
-                            Pemilihan Ketua OSIS SMK Negeri 2 Malinau 2025
+                            {config.eventTitle} {config.schoolName} {config.eventYear}
                         </span>
                     </p>
                 </div>
@@ -92,7 +125,7 @@ export default function ThankYouPage() {
                         <School className="w-12 h-12 text-blue-600 mr-4" />
                         <div className="text-left">
                             <h3 className="text-2xl font-bold text-gray-900">
-                                SMK NEGERI 2 MALINAU
+                                {config.schoolName.toUpperCase()}
                             </h3>
                             <p className="text-gray-600 font-medium">
                                 Mewujudkan Generasi Unggul dan Berkarakter
@@ -143,7 +176,7 @@ export default function ThankYouPage() {
                         Voting selesai pada: {new Date().toLocaleString('id-ID')}
                     </p>
                     <p className="text-green-300 text-xs">
-                        © 2025 SMK Negeri 2 Malinau - Sistem E-Voting Pemilihan Ketua OSIS
+                        © {config.eventYear} {config.schoolName} - Sistem E-Voting {config.eventTitle}
                     </p>
                 </div>
 

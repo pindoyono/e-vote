@@ -21,6 +21,13 @@ interface VoterInfo {
     hasVoted: boolean
 }
 
+interface Config {
+    schoolName: string
+    schoolShortName: string
+    eventTitle: string
+    eventYear: string
+}
+
 export default function VotingPage() {
     const params = useParams()
     const router = useRouter()
@@ -30,8 +37,34 @@ export default function VotingPage() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [config, setConfig] = useState<Config>({
+        schoolName: 'SMK Negeri 2 Malinau',
+        schoolShortName: 'SMKN 2 Malinau',
+        eventTitle: 'Pemilihan Ketua OSIS',
+        eventYear: '2025'
+    })
 
     const voteToken = params.token as string
+
+    useEffect(() => {
+        const fetchConfig = async () => {
+            try {
+                const response = await fetch('/api/admin/config')
+                if (response.ok) {
+                    const data = await response.json()
+                    setConfig({
+                        schoolName: data.schoolName || 'SMK Negeri 2 Malinau',
+                        schoolShortName: data.schoolShortName || 'SMKN 2 Malinau',
+                        eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
+                        eventYear: data.eventYear || '2025'
+                    })
+                }
+            } catch (error) {
+                console.error('Error fetching config:', error)
+            }
+        }
+        fetchConfig()
+    }, [])
 
     useEffect(() => {
         const fetchVotingData = async () => {
@@ -134,10 +167,10 @@ export default function VotingPage() {
                 {/* Header */}
                 <div className="text-center mb-8 pt-8">
                     <h1 className="text-4xl font-bold text-white mb-2">
-                        E-VOTE PEMILIHAN KETUA OSIS
+                        E-VOTE {config.eventTitle.toUpperCase()}
                     </h1>
                     <h2 className="text-2xl font-semibold text-blue-200 mb-4">
-                        SMK NEGERI 2 MALINAU
+                        {config.schoolName.toUpperCase()}
                     </h2>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 inline-block">
                         <p className="text-blue-100">
@@ -237,7 +270,7 @@ export default function VotingPage() {
                 {/* Footer */}
                 <div className="text-center mt-12 pb-8">
                     <p className="text-blue-200 text-sm">
-                        © 2025 SMK Negeri 2 Malinau - Sistem E-Voting
+                        © {config.eventYear} {config.schoolName} - Sistem E-Voting
                     </p>
                 </div>
             </div>
