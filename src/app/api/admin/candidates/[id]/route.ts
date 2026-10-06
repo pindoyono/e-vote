@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import fs from 'fs'
-import path from 'path'
+import { requireAdmin } from '@/lib/require-admin'
+import { saveCandidatePhoto, UploadError } from '@/lib/upload'
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     try {
         const { id } = await params
         const formData = await request.formData()
@@ -18,21 +21,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         let photoPath: string | undefined = undefined
         const file = formData.get('photo') as File | null
         if (file && file.size > 0) {
-            console.log('Processing file upload:', file.name, file.size)
-            const arrayBuffer = await file.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-            const fileName = `/uploads/${Date.now()}-${file.name}`
-
-            // Ensure uploads directory exists
-            const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
-            if (!fs.existsSync(uploadsDir)) {
-                fs.mkdirSync(uploadsDir, { recursive: true })
-            }
-
-            const fullPath = path.join(process.cwd(), 'public', fileName)
-            fs.writeFileSync(fullPath, buffer)
-            photoPath = fileName
-            console.log('File saved to:', fullPath)
+            console.log('Processing file upload:', file.size)
+            photoPath = await saveCandidatePhoto(file)
+            console.log('File saved to:', photoPath)
         } else {
             console.log('No file uploaded or file is empty')
         }
@@ -71,6 +62,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
         console.log('Candidate updated successfully:', updated.id)
         return NextResponse.json(updated)
     } catch (error) {
+        if (error instanceof UploadError) {
+            return NextResponse.json({ error: error.message }, { status: 400 })
+        }
         console.error('Update candidate error:', error)
         return NextResponse.json({
             error: 'Failed to update candidate',
@@ -80,6 +74,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     try {
         const { id } = await params
         await prisma.candidate.delete({ where: { id } })

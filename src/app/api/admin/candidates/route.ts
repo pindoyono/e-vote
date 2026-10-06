@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import fs from 'fs'
-import path from 'path'
+import { requireAdmin } from '@/lib/require-admin'
+import { saveCandidatePhoto, UploadError } from '@/lib/upload'
 
 export async function GET() {
     try {
@@ -14,6 +14,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const denied = await requireAdmin()
+    if (denied) return denied
+
     try {
         const formData = await request.formData()
         const name = formData.get('name') as string
@@ -25,12 +28,7 @@ export async function POST(request: Request) {
         let photoPath: string | undefined = undefined
         const file = formData.get('photo') as File | null
         if (file && file.size > 0) {
-            const arrayBuffer = await file.arrayBuffer()
-            const buffer = Buffer.from(arrayBuffer)
-            const fileName = `/uploads/${Date.now()}-${file.name}`
-            const fullPath = path.join(process.cwd(), 'public', fileName)
-            fs.writeFileSync(fullPath, buffer)
-            photoPath = fileName
+            photoPath = await saveCandidatePhoto(file)
         }
 
         const candidate = await prisma.candidate.create({
@@ -46,6 +44,9 @@ export async function POST(request: Request) {
 
         return NextResponse.json(candidate)
     } catch (error) {
+        if (error instanceof UploadError) {
+            return NextResponse.json({ error: error.message }, { status: 400 })
+        }
         console.error('Create candidate error:', error)
         return NextResponse.json({ error: 'Failed to create candidate' }, { status: 500 })
     }
