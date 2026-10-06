@@ -19,10 +19,12 @@ export async function middleware(req: NextRequest) {
     const token = await getToken({ req })
 
     if (token?.role !== area.role) {
-        const url = req.nextUrl.clone()
-        url.pathname = area.login
-        url.search = ''
-        return NextResponse.redirect(url)
+        // req.nextUrl berisi alamat internal server (127.0.0.1:port) di belakang reverse proxy,
+        // jadi tujuan redirect disusun dari Host yang diteruskan nginx
+        const host = req.headers.get('host')
+        const proto = req.headers.get('x-forwarded-proto') || req.nextUrl.protocol.replace(':', '')
+        const origin = host ? `${proto}://${host}` : req.nextUrl.origin
+        return NextResponse.redirect(new URL(area.login, origin))
     }
 
     return NextResponse.next()
