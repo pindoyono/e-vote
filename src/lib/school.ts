@@ -1,4 +1,4 @@
-import { School } from '@prisma/client'
+import { School, VotingSession } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { normalizeVoteToken } from '@/lib/auth'
 import { normalizeNpsn } from '@/lib/validations'
@@ -16,6 +16,13 @@ export function publicSchool(school: School) {
 }
 
 export type PublicSchool = ReturnType<typeof publicSchool>
+
+// Alasan voting tidak bisa dilakukan, untuk ditampilkan ke pemilih
+export function votingClosedMessage(session: VotingSession | null) {
+    return session?.endTime
+        ? 'Pemilihan sudah ditutup oleh panitia.'
+        : 'Pemilihan belum dibuka. Tunggu sampai panitia/admin membuka pemilihan, lalu masukkan token Anda lagi.'
+}
 
 export async function findActiveSchoolByNpsn(npsn: string) {
     return prisma.school.findFirst({

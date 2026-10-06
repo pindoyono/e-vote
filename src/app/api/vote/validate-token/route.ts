@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { normalizeVoteToken, VOTE_TOKEN_LENGTH } from '@/lib/auth'
+import { votingClosedMessage } from '@/lib/school'
 
 export async function POST(request: Request) {
     try {
@@ -45,6 +46,18 @@ export async function POST(request: Request) {
             return NextResponse.json(
                 { error: 'Anda sudah melakukan voting sebelumnya' },
                 { status: 403 }
+            )
+        }
+
+        // Cek di awal supaya pemilih tidak lolos ke halaman voting lalu gagal di sana
+        const votingSession = await prisma.votingSession.findUnique({
+            where: { schoolId: voter.schoolId }
+        })
+
+        if (!votingSession?.isActive) {
+            return NextResponse.json(
+                { error: votingClosedMessage(votingSession) },
+                { status: 400 }
             )
         }
 

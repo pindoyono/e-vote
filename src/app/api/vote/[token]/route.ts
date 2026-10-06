@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { findVoterByToken, publicSchool } from '@/lib/school'
+import { findVoterByToken, publicSchool, votingClosedMessage } from '@/lib/school'
 
 export async function GET(
     request: Request,
@@ -21,9 +21,10 @@ export async function GET(
             where: { schoolId: voter.schoolId }
         })
 
-        if (!votingSession?.isActive) {
+        // Pemilih yang sudah memilih tetap diarahkan ke halaman terima kasih walau voting sudah ditutup
+        if (!votingSession?.isActive && !voter.hasVoted) {
             return NextResponse.json(
-                { error: 'Pemilihan belum dimulai atau sudah berakhir' },
+                { error: votingClosedMessage(votingSession) },
                 { status: 400 }
             )
         }

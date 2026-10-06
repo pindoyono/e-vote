@@ -51,12 +51,14 @@ export default function VotingPage() {
         const fetchVotingData = async () => {
             try {
                 const response = await fetch(`/api/vote/${voteToken}`)
+                const data = await response.json().catch(() => ({}))
 
                 if (!response.ok) {
-                    throw new Error('Token tidak valid atau sudah kadaluarsa')
+                    // Tampilkan alasan dari server (mis. pemilihan belum dibuka), bukan pesan umum
+                    setError(data.error || 'Token tidak valid atau terjadi kesalahan')
+                    return
                 }
 
-                const data = await response.json()
                 setVoter(data.voter)
                 setCandidates(data.candidates)
                 if (data.school) setConfig(data.school)
@@ -132,11 +134,17 @@ export default function VotingPage() {
             <div className="min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-red-900 flex items-center justify-center p-4">
                 <div className="text-center">
                     <div className="bg-white rounded-lg p-8 max-w-md">
-                        <h1 className="text-2xl font-bold text-red-600 mb-4">Error</h1>
+                        <h1 className="text-2xl font-bold text-red-600 mb-4">Belum Bisa Memilih</h1>
                         <p className="text-gray-700 mb-4">{error}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 mb-6">
                             Silakan hubungi panitia jika masalah berlanjut.
                         </p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-6 rounded-lg"
+                        >
+                            Coba Lagi
+                        </button>
                     </div>
                 </div>
             </div>
