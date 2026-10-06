@@ -1,11 +1,18 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { requireAdmin } from '@/lib/require-admin'
+import { requireSchoolUser } from '@/lib/tenant'
 import { saveCandidatePhoto, UploadError } from '@/lib/upload'
+import { isUniqueViolation } from '@/lib/db-errors'
 
 export async function GET() {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+
     try {
-        const candidates = await prisma.candidate.findMany({ orderBy: { orderNumber: 'asc' } })
+        const candidates = await prisma.candidate.findMany({
+            where: { schoolId: auth.schoolId },
+            orderBy: { orderNumber: 'asc' }
+        })
         return NextResponse.json(candidates)
     } catch (error) {
         console.error('Get candidates error:', error)
@@ -14,8 +21,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-    const denied = await requireAdmin()
-    if (denied) return denied
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
 
     try {
         const formData = await request.formData()
@@ -33,6 +40,7 @@ export async function POST(request: Request) {
 
         const candidate = await prisma.candidate.create({
             data: {
+                schoolId: auth.schoolId,
                 name,
                 class: kelas,
                 vision,
@@ -46,6 +54,9 @@ export async function POST(request: Request) {
     } catch (error) {
         if (error instanceof UploadError) {
             return NextResponse.json({ error: error.message }, { status: 400 })
+        }
+        if (isUniqueViolation(error)) {
+            return NextResponse.json({ error: 'Nomor urut kandidat sudah dipakai' }, { status: 400 })
         }
         console.error('Create candidate error:', error)
         return NextResponse.json({ error: 'Failed to create candidate' }, { status: 500 })

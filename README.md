@@ -1,439 +1,76 @@
-# 🗳️ E-Vote SMK N 2 Malinau
+# 🗳️ E-Vote Sekolah
 
-Aplikasi pemilihan elektronik (e-voting) untuk memilih Ketua OSIS SMK Negeri 2 Malinau tahun 2025. Aplikasi ini dibangun menggunakan Next.js dengan TypeScript, TailwindCSS, dan Prisma sebagai ORM database.
+Platform pemilihan elektronik (ketua OSIS, ketua kelas, dan pemilihan lain) untuk semua jenjang: SD/MI, SMP/MTs, SMA/MA/SMK, SLB, dan satuan pendidikan lainnya. Setiap sekolah mendaftar dengan **NPSN** sebagai identitas, lalu mengelola data pemilihannya sendiri secara terpisah dari sekolah lain.
 
-## ✨ Fitur Utama
+Dibangun dengan Next.js 15, TypeScript, TailwindCSS, Prisma (PostgreSQL), dan NextAuth.js.
 
-### 🔐 Admin Panel
-- **Autentikasi Admin**: Login aman dengan NextAuth.js
-- **Manajemen Data Pemilih**: CRUD pemilih, import/export CSV
-- **Manajemen Kandidat**: CRUD kandidat dengan upload foto
-- **Verifikasi Pemilih**: Generate URL voting unik untuk setiap pemilih
-- **Dashboard Real-time**: Monitoring hasil pemilihan secara langsung
-- **Kontrol Pemilihan**: Aktifkan/nonaktifkan sesi voting
-- **Reset Data**: Reset semua data voting jika diperlukan
+## Alur penggunaan
 
-### 👥 Committee Panel
-- **Login Panitia**: Akses terpisah untuk panitia pemilihan
-- **Verifikasi Pemilih**: Panitia dapat memverifikasi data pemilih
-- **Manajemen Token**: Generate dan kelola token voting
+1. **Sekolah mendaftar** di `/daftar`: NPSN, nama sekolah, jenjang, penanggung jawab, dan akun admin. Status awal *menunggu*.
+2. **Pengelola platform** (super admin) memeriksa NPSN dan menyetujui pendaftaran di `/superadmin`.
+3. **Admin sekolah** login di `/admin/login` dengan NPSN + username + password, lalu:
+   - mengatur nama sekolah dan judul pemilihan (Pengaturan),
+   - mengimpor/menambah data pemilih (NISN atau NIS),
+   - menambah kandidat beserta foto,
+   - membuat akun panitia.
+4. **Panitia** login di `/committee/login` (NPSN + username + password) untuk memverifikasi pemilih di hari H. Setiap pemilih terverifikasi mendapat **token 8 karakter**.
+5. **Admin membuka voting**. Pemilih memasukkan token di halaman depan atau di `/s/<NPSN>`, lalu memilih satu kandidat.
+6. **Hasil** dipantau realtime di `/s/<NPSN>/monitoring`.
 
-### 🗳️ Sistem Voting
-- **URL Unik**: Setiap pemilih mendapat URL voting yang unik dan aman (5 karakter)
-- **Interface Responsif**: Desain yang user-friendly dan mobile-responsive
-- **Foto Kandidat**: Tampilan foto kandidat yang professional
-- **Validasi Ketat**: Satu pemilih hanya bisa voting sekali
-- **Audit Trail**: Pencatatan IP address dan user agent untuk keamanan
+## Halaman
 
-### 📊 Monitoring Real-time
-- **Dashboard Publik**: Pantau hasil secara real-time tanpa login
-- **Grafik Interaktif**: Bar chart dan pie chart hasil pemilihan
-- **Statistik Lengkap**: Total pemilih, partisipasi, dan sebaran suara
-- **Update Otomatis**: Refresh data setiap 5 detik
+| URL | Untuk |
+|---|---|
+| `/` | Beranda platform, masukkan token, cari sekolah |
+| `/daftar` | Pendaftaran sekolah |
+| `/s/<NPSN>` | Halaman publik sekolah |
+| `/s/<NPSN>/monitoring` | Hasil realtime sekolah |
+| `/admin/*` | Panel admin sekolah |
+| `/committee/*` | Panel panitia |
+| `/superadmin` | Persetujuan & pengelolaan sekolah |
+| `/vote/<TOKEN>` | Halaman memilih |
 
-## 🛠️ Teknologi yang Digunakan
+## Model data dan keamanan
 
-- **Frontend**: Next.js 15, TypeScript, TailwindCSS
-- **Backend**: Next.js API Routes
-- **Database**: SQLite dengan Prisma ORM
-- **Authentication**: NextAuth.js
-- **File Upload**: Multer (untuk foto kandidat)
-- **Charts**: Recharts
-- **Icons**: Lucide React
-- **Validation**: Zod
-- **Forms**: React Hook Form
+- Tabel `schools` (NPSN unik, status `PENDING`/`ACTIVE`/`REJECTED`/`SUSPENDED`). Semua data lain (admin, panitia, kandidat, pemilih, suara, sesi voting) memiliki `schoolId`.
+- Setiap API sekolah mengambil `schoolId` dari sesi login (bukan dari input) dan mengecek ulang bahwa sekolah masih `ACTIVE`, sehingga sekolah yang dinonaktifkan langsung terkunci walaupun sesinya masih berlaku.
+- NISN/NIS dan nomor urut kandidat unik **per sekolah**; username admin/panitia unik per sekolah.
+- Token pemilih: 8 karakter acak kriptografis tanpa huruf yang mirip (0/O, 1/I/L), unik global.
+- Satu suara per pemilih dijaga atomik di transaksi dan oleh constraint unik di database.
+- Kandidat/pemilih yang sudah memiliki suara tidak bisa dihapus (hasil tidak berubah diam-diam).
+- Upload foto kandidat: hanya JPG/PNG/WebP (dicek dari isi file), maks 5 MB, nama file dibuat server.
 
-## 🚀 Quick Start
+## Pengembangan lokal
 
-### 🏭 Production Deployment (VPS Ubuntu + Nginx)
-
-#### Option 1: One-Command Deployment (Direkomendasikan)
-```bash
-curl -fsSL https://raw.githubusercontent.com/pindoyono/e-vote/main/deploy.sh | bash -s your-domain.com admin@your-domain.com
-```
-
-#### Option 2: Manual Step-by-Step
-```bash
-git clone https://github.com/pindoyono/e-vote.git
-cd e-vote
-# Ikuti panduan lengkap di VPS-DEPLOYMENT.md
-```
-
-**📚 Panduan Deployment:**
-- 🚀 [Quick Start VPS](./DEPLOY-QUICK.md) - Panduan singkat VPS Ubuntu
-- 📖 [VPS Deployment Guide](./VPS-DEPLOYMENT.md) - Panduan lengkap VPS dengan Nginx
-- 🐳 [Docker Guide](./DOCKER.md) - Deployment dengan Docker (opsional)
-
-### 💻 Development Setup
-
-#### Prasyarat
-- Node.js 18+ 
-- npm atau yarn atau pnpm
-
-#### Instalasi Cepat
+Prasyarat: Node.js 20+, PostgreSQL 14+.
 
 ```bash
-# Clone repository
-git clone https://github.com/pindoyono/e-vote.git
-cd e-vote
-
-# Install dependencies
-npm install
-
-# Setup environment
-cp .env.example .env
-
-# Setup database
-npx prisma migrate dev --name init
-npx prisma generate
-
-# Seed initial data
-npx prisma db seed
-
-# Start development server
+npm ci
+cp .env.example .env    # isi DATABASE_URL, NEXTAUTH_URL, NEXTAUTH_SECRET
+npx prisma migrate dev
+SUPERADMIN_USERNAME=admin SUPERADMIN_PASSWORD='password-minimal-12' node scripts/create-superadmin.mjs
 npm run dev
 ```
 
-**Akses aplikasi di http://localhost:3000**
-   ```
+Variabel lingkungan:
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+| Variabel | Keterangan |
+|---|---|
+| `DATABASE_URL` | `postgresql://user:pass@127.0.0.1:5432/evote` |
+| `NEXTAUTH_URL` | URL publik utama, mis. `https://e-vote.example.id` |
+| `NEXTAUTH_SECRET` | Rahasia acak panjang (`openssl rand -base64 48`) |
+| `UPLOAD_DIR` | Opsional: folder foto kandidat di luar kode; sajikan sebagai `/uploads/` lewat web server |
 
-3. **Setup Environment Variables**
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit file `.env`:
-   ```env
-   DATABASE_URL="file:./dev.db"
-   NEXTAUTH_URL="http://localhost:3000"
-   NEXTAUTH_SECRET="your-super-secret-key-here"
-   ```
-
-4. **Setup Database**
-   ```bash
-   npx prisma migrate dev --name init
-   npx prisma generate
-   ```
-
-5. **Seed Data**
-   ```bash
-   npx tsx prisma/seed.ts
-   ```
-
-6. **Run Development Server**
-   ```bash
-   npm run dev
-   ```
-
-7. **Akses Aplikasi**
-   - Homepage: http://localhost:3000
-   - Admin Panel: http://localhost:3000/admin/login
-   - Monitoring: http://localhost:3000/monitoring
-
-## 👥 Default Users
-
-⚠️ **Kredensial Login**: Untuk keamanan, kredensial default tidak ditampilkan di dokumentasi publik. Hubungi administrator sistem untuk mendapatkan akses login.
-
-### Admin
-- **Akses**: `/admin/login`
-
-### Committee (Panitia)
-- **Akses**: `/committee/login`
-
-### Kandidat Default
-1. **Ahmad Rizki Pratama** (XII RPL 1) - Kandidat 1
-2. **Siti Nurhaliza** (XII TKJ 1) - Kandidat 2
-3. **Muhammad Fajar Sidiq** (XII OTKP 1) - Kandidat 3
-
-## 📋 Panduan Penggunaan
-
-### Untuk Admin
-
-1. **Login ke Admin Panel**
-   - Kunjungi `/admin/login`
-   - Masukkan kredensial admin yang telah diberikan oleh administrator sistem
-
-2. **Mengelola Data Pemilih**
-   - Buka menu "Data Pemilih"
-   - **Tambah Manual**: Klik "Tambah Pemilih" dan isi form
-   - **Import CSV**: Upload file CSV dengan format `Nama,Kelas,NISN`
-   - **Export CSV**: Download template atau data pemilih
-
-3. **Mengelola Kandidat**
-   - Buka menu "Kandidat"
-   - **Tambah Kandidat**: Klik "Tambah Kandidat"
-   - **Upload Foto**: Pilih foto kandidat (max 2MB, JPG/PNG)
-   - **Edit Kandidat**: Klik tombol edit untuk mengubah data
-   - **Hapus Kandidat**: Klik tombol hapus dengan konfirmasi
-
-4. **Verifikasi Pemilih**
-   - Buka menu "Verifikasi"
-   - Klik "Verifikasi" untuk mengonfirmasi data pemilih
-   - Salin URL voting yang dihasilkan (format: `/vote/ABC12`)
-   - Berikan URL kepada pemilih yang bersangkutan
-
-5. **Mengaktifkan Pemilihan**
-   - Buka menu "Pengaturan"
-   - Klik "Aktifkan Voting"
-   - Pemilih dapat mulai voting setelah voting diaktifkan
-
-6. **Monitoring Hasil**
-   - Buka menu "Dashboard" untuk melihat hasil real-time
-   - Atau kunjungi `/monitoring` untuk tampilan full-screen
-
-### Untuk Committee (Panitia)
-
-1. **Login Committee Panel**
-   - Kunjungi `/committee/login`
-   - Masukkan kredensial panitia yang telah diberikan oleh administrator sistem
-
-2. **Verifikasi Pemilih**
-   - Akses halaman verifikasi
-   - Cari pemilih berdasarkan nama atau kelas
-   - Verifikasi data pemilih dan generate token voting
-
-### Untuk Pemilih
-
-1. **Akses URL Voting**
-   - Buka URL yang diberikan oleh panitia
-   - Format: `/vote/[token-5-karakter]`
-
-2. **Melakukan Voting**
-   - Lihat foto dan nomor urut ketiga kandidat
-   - Pilih salah satu kandidat dengan klik "PILIH"
-   - Konfirmasi pilihan dengan "SUBMIT SUARA"
-   - **Pilihan tidak dapat diubah setelah dikonfirmasi**
-
-3. **Konfirmasi**
-   - Setelah voting, akan muncul halaman terima kasih
-   - URL voting tidak dapat digunakan lagi
-
-## 🔒 Keamanan
-
-- **Token Unik**: Setiap pemilih mendapat token yang di-generate secara random
-- **Validasi Database**: Cek duplikasi dan validasi data
-- **Session Management**: Menggunakan NextAuth.js
-- **Audit Logging**: IP address dan user agent dicatat
-- **One-time Vote**: Satu pemilih hanya bisa voting sekali
-
-## 📊 Database Schema
-
-### Admin
-- `id`: String (Primary Key)
-- `username`: String (Unique)
-- `password`: String (Hashed with bcrypt)
-- `name`: String
-
-### Committee
-- `id`: String (Primary Key)
-- `username`: String (Unique)
-- `password`: String (Hashed with bcrypt)
-- `name`: String
-
-### Voter
-- `id`: String (Primary Key)
-- `name`: String
-- `class`: String
-- `nisn`: String (Unique)
-- `isVerified`: Boolean
-- `hasVoted`: Boolean
-- `voteToken`: String (Unique, 5 characters)
-
-### Candidate
-- `id`: String (Primary Key)
-- `name`: String
-- `class`: String
-- `vision`: String
-- `mission`: String
-- `photo`: String (Path to uploaded image)
-- `orderNumber`: Integer (Unique)
-
-### Vote
-- `id`: String (Primary Key)
-- `voterId`: String (Foreign Key)
-- `candidateId`: String (Foreign Key)
-- `voteToken`: String
-- `ipAddress`: String
-- `userAgent`: String
-- `createdAt`: DateTime
-
-### VotingSession
-- `id`: String (Primary Key)
-- `isActive`: Boolean
-- `startTime`: DateTime
-- `endTime`: DateTime
-
-## 🔧 API Endpoints
-
-### Authentication
-- `POST /api/auth/signin` - Login admin/committee
-- `POST /api/auth/signout` - Logout
-- `GET /api/auth/session` - Get current session
-
-### Admin APIs
-- `GET /api/admin/dashboard` - Dashboard statistics
-- `GET /api/admin/voters` - Get all voters
-- `POST /api/admin/voters` - Create voter
-- `PUT /api/admin/voters/[id]` - Update voter
-- `DELETE /api/admin/voters/[id]` - Delete voter
-- `POST /api/admin/voters/[id]/verify` - Verify voter
-- `GET /api/admin/voters/unverified` - Get unverified voters
-- `POST /api/admin/voters/import` - Import voters from CSV
-- `GET /api/admin/voters/template` - Download CSV template
-
-### Candidate APIs
-- `GET /api/admin/candidates` - Get all candidates
-- `POST /api/admin/candidates` - Create candidate (with photo upload)
-- `PUT /api/admin/candidates/[id]` - Update candidate (with photo upload)
-- `DELETE /api/admin/candidates/[id]` - Delete candidate
-
-### Voting Session APIs
-- `GET /api/admin/voting-session` - Get voting session status
-- `POST /api/admin/voting-session` - Manage voting session
-
-### Voting APIs
-- `GET /api/vote/[token]` - Get voting data (voter info + candidates)
-- `POST /api/vote/[token]/submit` - Submit vote
-- `GET /api/vote/[token]/status` - Get voter status
-
-### Monitoring APIs
-- `GET /api/monitoring/realtime` - Real-time statistics
-
-## 🎨 Tampilan
-
-### Homepage
-- Landing page dengan informasi aplikasi
-- Link ke admin panel dan monitoring
-
-### Admin Panel
-- Dashboard dengan statistik
-- Manajemen data pemilih
-- Verifikasi dan generate URL
-- Pengaturan sistem
-
-### Voting Page
-- Profil 3 kandidat dengan visi misi
-- Interface voting yang user-friendly
-- Halaman terima kasih setelah voting
-
-### Monitoring
-- Real-time dashboard dengan grafik
-- Auto-refresh setiap 5 detik
-- Statistik lengkap dan trend voting
-
-## 🚀 Production Deployment (VPS Ubuntu)
-
-### Server Requirements
-- **OS**: Ubuntu 20.04+ (recommended)
-- **RAM**: 2GB minimum (4GB recommended)
-- **Storage**: 20GB SSD minimum
-- **CPU**: 2 vCPU minimum
-- **Domain**: Pointing to server IP
-
-### Deployment Options
-
-#### 1. Automatic Script (Direkomendasikan)
-Deployment otomatis dengan Nginx, SSL, dan PM2:
+## Produksi (ringkas)
 
 ```bash
-# Download and run deployment script
-wget https://raw.githubusercontent.com/pindoyono/e-vote/main/deploy.sh
-chmod +x deploy.sh
-sudo ./deploy.sh your-domain.com your-email@domain.com
-```
-
-**Features:**
-- ✅ Nginx reverse proxy
-- ✅ SSL certificate (Let's Encrypt)
-- ✅ PM2 process manager
-- ✅ Auto-backup system
-- ✅ Health monitoring
-- ✅ Security hardening
-
-#### 2. Manual Deployment
-Custom deployment dengan kontrol penuh:
-
-```bash
-# 1. Clone repository
-git clone https://github.com/pindoyono/e-vote.git
-cd e-vote
-
-# 2. Install dependencies
-npm ci --production
-
-# 3. Setup environment
-cp .env.example .env.production
-
-# 4. Build aplikasi
+npm ci
+npx prisma generate
 npm run build
-
-# 5. Setup database
 npx prisma migrate deploy
-
-# 6. Start with PM2
-pm2 start ecosystem.config.js
+node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3010
 ```
 
-### Post-Deployment Checklist
-- [ ] SSL certificate working
-- [ ] Domain pointing ke server
-- [ ] Admin access configured
-- [ ] Backup system enabled
-- [ ] Monitoring setup
-- [ ] Performance testing done
+Jalankan sebagai user khusus lewat systemd, di belakang nginx (reverse proxy + HTTPS). Sajikan `UPLOAD_DIR` sebagai `/uploads/` langsung dari nginx, dan batasi laju (rate limit) `/api/auth/callback/`, `/api/register`, serta `/api/vote/`.
 
-### Management Commands
-```bash
-# Update application
-sudo /usr/local/bin/update-evote.sh
-
-# Backup system
-sudo /usr/local/bin/backup-evote.sh
-
-# Check status
-pm2 status
-sudo systemctl status nginx
-
-# View logs
-pm2 logs e-vote-production
-sudo tail -f /var/log/nginx/e-vote-error.log
-```
-
-### Troubleshooting
-- **Application won't start**: Check PM2 logs dengan `pm2 logs e-vote-production`
-- **SSL issues**: Verify certificate dengan `sudo certbot certificates`
-- **Database errors**: Check file permissions dan disk space
-- **High memory usage**: Restart PM2 atau increase server resources
-
-**📚 Complete Deployment Guides:**
-- [Quick Start VPS](./DEPLOY-QUICK.md)
-- [Full VPS Deployment Guide](./VPS-DEPLOYMENT.md)
-- [Docker Guide](./DOCKER.md) (opsional)
-
-## 🤝 Kontribusi
-
-1. Fork repository
-2. Buat branch fitur (`git checkout -b feature/amazing-feature`)
-3. Commit perubahan (`git commit -m 'Add amazing feature'`)
-4. Push ke branch (`git push origin feature/amazing-feature`)
-5. Buat Pull Request
-
-## 📝 License
-
-Aplikasi ini dibuat khusus untuk SMK Negeri 2 Malinau.
-
-## 📞 Support
-
-Untuk bantuan teknis atau pertanyaan, silakan hubungi:
-- Email: admin@smkn2malinau.sch.id
-- Phone: +62xxx-xxxx-xxxx
-
----
-
-**© 2025 SMK Negeri 2 Malinau - Sistem E-Voting Pemilihan Ketua OSIS**
-# e-vote
+> Dokumen deployment lama (`VPS-DEPLOYMENT.md`, `deploy.sh`, `DOCKER.md`, dll.) ditulis untuk versi satu sekolah berbasis SQLite dan belum diperbarui.

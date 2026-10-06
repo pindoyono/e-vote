@@ -1,38 +1,39 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { normalizeVoteToken, VOTE_TOKEN_LENGTH } from '@/lib/auth'
 
 export async function POST(request: Request) {
     try {
-        const { token } = await request.json()
+        const body = await request.json()
 
-        if (!token) {
+        if (!body?.token || typeof body.token !== 'string') {
             return NextResponse.json(
                 { error: 'Token tidak boleh kosong' },
                 { status: 400 }
             )
         }
 
-        // Validate token format (5 characters)
-        if (token.length !== 5) {
+        const token = normalizeVoteToken(body.token)
+
+        if (token.length !== VOTE_TOKEN_LENGTH) {
             return NextResponse.json(
-                { error: 'Token harus 5 karakter' },
+                { error: `Token harus ${VOTE_TOKEN_LENGTH} karakter` },
                 { status: 400 }
             )
         }
 
-        // Find voter with this token
         const voter = await prisma.voter.findUnique({
-            where: { voteToken: token }
+            where: { voteToken: token },
+            include: { school: { select: { status: true } } }
         })
 
-        if (!voter) {
+        if (!voter || voter.school.status !== 'ACTIVE') {
             return NextResponse.json(
                 { error: 'Token tidak ditemukan' },
                 { status: 404 }
             )
         }
 
-        // Check if voter is verified
         if (!voter.isVerified) {
             return NextResponse.json(
                 { error: 'Pemilih belum diverifikasi. Silakan hubungi panitia.' },
@@ -40,7 +41,6 @@ export async function POST(request: Request) {
             )
         }
 
-        // Check if voter has already voted
         if (voter.hasVoted) {
             return NextResponse.json(
                 { error: 'Anda sudah melakukan voting sebelumnya' },
@@ -48,7 +48,6 @@ export async function POST(request: Request) {
             )
         }
 
-        // Token is valid
         return NextResponse.json({
             valid: true,
             message: 'Token valid',

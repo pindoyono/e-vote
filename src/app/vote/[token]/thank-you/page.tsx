@@ -11,6 +11,7 @@ interface VoterInfo {
 }
 
 interface Config {
+    npsn?: string
     schoolName: string
     schoolShortName: string
     eventTitle: string
@@ -23,32 +24,13 @@ export default function ThankYouPage() {
     const [voter, setVoter] = useState<VoterInfo | null>(null)
     const [loading, setLoading] = useState(true)
     const [config, setConfig] = useState<Config>({
-        schoolName: 'SMK Negeri 2 Malinau',
-        schoolShortName: 'SMKN 2 Malinau',
-        eventTitle: 'Pemilihan Ketua OSIS',
-        eventYear: '2025'
+        schoolName: '',
+        schoolShortName: '',
+        eventTitle: '',
+        eventYear: ''
     })
     const voteToken = params.token as string
 
-    useEffect(() => {
-        const fetchConfig = async () => {
-            try {
-                const response = await fetch('/api/admin/config')
-                if (response.ok) {
-                    const data = await response.json()
-                    setConfig({
-                        schoolName: data.schoolName || 'SMK Negeri 2 Malinau',
-                        schoolShortName: data.schoolShortName || 'SMKN 2 Malinau',
-                        eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
-                        eventYear: data.eventYear || '2025'
-                    })
-                }
-            } catch (error) {
-                console.error('Error fetching config:', error)
-            }
-        }
-        fetchConfig()
-    }, [])
 
     useEffect(() => {
         const fetchVoterInfo = async () => {
@@ -57,6 +39,7 @@ export default function ThankYouPage() {
                 if (response.ok) {
                     const data = await response.json()
                     setVoter(data.voter)
+                    if (data.school) setConfig(data.school)
                 }
             } catch (error) {
                 console.error('Error fetching voter info:', error)
@@ -161,7 +144,7 @@ export default function ThankYouPage() {
 
                         {/* Button Kembali ke Halaman Utama */}
                         <button
-                            onClick={() => router.push('/')}
+                            onClick={() => router.push(config.npsn ? `/s/${config.npsn}` : '/')}
                             className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
                         >
                             <Home className="w-5 h-5 mr-2" />

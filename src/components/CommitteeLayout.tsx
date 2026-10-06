@@ -21,8 +21,8 @@ export default function CommitteeLayout({ children }: CommitteeLayoutProps) {
     const { data: session, status } = useSession()
     const router = useRouter()
     const [config, setConfig] = useState({
-        schoolShortName: 'SMK N2 Malinau',
-        eventYear: '2025'
+        schoolShortName: '',
+        eventYear: ''
     })
 
     useEffect(() => {
@@ -30,8 +30,8 @@ export default function CommitteeLayout({ children }: CommitteeLayoutProps) {
             .then(res => res.json())
             .then(data => {
                 setConfig({
-                    schoolShortName: data.schoolShortName || 'SMK N2 Malinau',
-                    eventYear: data.eventYear || '2025'
+                    schoolShortName: data.schoolShortName || '',
+                    eventYear: data.eventYear || ''
                 })
             })
             .catch(err => console.error('Failed to load config:', err))
@@ -95,7 +95,7 @@ export default function CommitteeLayout({ children }: CommitteeLayoutProps) {
                                 <span>Verifikasi</span>
                             </Link>
                             <Link
-                                href="/monitoring"
+                                href={session?.user?.npsn ? `/s/${session.user.npsn}/monitoring` : '/monitoring'}
                                 className="flex items-center space-x-2 text-green-100 hover:text-white transition-colors"
                             >
                                 <Shield className="h-4 w-4" />
@@ -146,7 +146,7 @@ export default function CommitteeLayout({ children }: CommitteeLayoutProps) {
                         <span className="text-sm">Verifikasi</span>
                     </Link>
                     <Link
-                        href="/monitoring"
+                        href={session?.user?.npsn ? `/s/${session.user.npsn}/monitoring` : '/monitoring'}
                         className="flex items-center space-x-2 text-green-100 hover:text-white transition-colors"
                     >
                         <Shield className="h-4 w-4" />

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import AdminLayout from '@/components/AdminLayout'
+import CommitteeManager from '@/components/CommitteeManager'
 import { Power, Settings, Users } from 'lucide-react'
 
 interface VotingSession {
@@ -29,6 +30,7 @@ export default function SettingsPage() {
     const [saving, setSaving] = useState(false)
 
     // Config state
+    const [npsn, setNpsn] = useState('')
     const [schoolName, setSchoolName] = useState('')
     const [schoolShortName, setSchoolShortName] = useState('')
     const [eventTitle, setEventTitle] = useState('')
@@ -53,10 +55,11 @@ export default function SettingsPage() {
             setStats(statsData)
 
             // Set config values
-            setSchoolName(configData.schoolName || 'SMK Negeri 2 Malinau')
-            setSchoolShortName(configData.schoolShortName || 'SMK N2 Malinau')
-            setEventTitle(configData.eventTitle || 'Pemilihan Ketua OSIS')
-            setEventYear(configData.eventYear || '2025')
+            setNpsn(configData.npsn || '')
+            setSchoolName(configData.schoolName || '')
+            setSchoolShortName(configData.schoolShortName || '')
+            setEventTitle(configData.eventTitle || '')
+            setEventYear(configData.eventYear || '')
         } catch (error) {
             console.error('Error fetching data:', error)
         } finally {
@@ -146,7 +149,7 @@ export default function SettingsPage() {
             if (response.ok) {
                 alert('Konfigurasi berhasil disimpan!')
             } else {
-                alert('Gagal menyimpan konfigurasi')
+                alert(data.error || 'Gagal menyimpan konfigurasi')
             }
         } catch (error) {
             console.error('Save config error:', error)
@@ -184,6 +187,16 @@ export default function SettingsPage() {
                         Konfigurasi Sekolah & Event
                     </h2>
 
+                    <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <div>
+                            <p className="text-sm text-gray-600">NPSN (identitas sekolah, tidak bisa diubah)</p>
+                            <p className="text-xl font-mono font-bold text-gray-900">{npsn}</p>
+                        </div>
+                        <a href={`/s/${npsn}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 font-medium hover:underline">
+                            Buka halaman publik sekolah →
+                        </a>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -193,7 +206,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={schoolName}
                                 onChange={(e) => setSchoolName(e.target.value)}
-                                placeholder="Contoh: SMK Negeri 2 Malinau"
+                                placeholder="Contoh: SD Negeri 1 Contoh"
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                             />
                             <p className="text-xs text-gray-500 mt-1">Nama lengkap sekolah untuk tampil di seluruh sistem</p>
@@ -207,7 +220,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={schoolShortName}
                                 onChange={(e) => setSchoolShortName(e.target.value)}
-                                placeholder="Contoh: SMK N2 Malinau"
+                                placeholder="Contoh: SDN 1 Contoh"
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                             />
                             <p className="text-xs text-gray-500 mt-1">Nama singkat untuk header dan judul</p>
@@ -221,7 +234,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={eventTitle}
                                 onChange={(e) => setEventTitle(e.target.value)}
-                                placeholder="Contoh: Pemilihan Ketua OSIS"
+                                placeholder="Contoh: Pemilihan Ketua OSIS / Ketua Kelas"
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                             />
                             <p className="text-xs text-gray-500 mt-1">Nama event/pemilihan yang sedang berlangsung</p>
@@ -235,7 +248,7 @@ export default function SettingsPage() {
                                 type="text"
                                 value={eventYear}
                                 onChange={(e) => setEventYear(e.target.value)}
-                                placeholder="Contoh: 2025"
+                                placeholder="Contoh: 2026"
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                             />
                             <p className="text-xs text-gray-500 mt-1">Tahun pelaksanaan event</p>
@@ -417,6 +430,8 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
+                <CommitteeManager />
+
                 {/* System Info */}
                 <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-8 border border-gray-200">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
@@ -427,11 +442,11 @@ export default function SettingsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="bg-white p-6 rounded-lg border border-gray-200">
                             <p className="text-gray-600 font-medium mb-2">Versi Sistem:</p>
-                            <p className="text-2xl font-bold text-blue-600">E-Vote v1.0</p>
+                            <p className="text-2xl font-bold text-blue-600">E-Vote Sekolah v2.0</p>
                         </div>
                         <div className="bg-white p-6 rounded-lg border border-gray-200">
                             <p className="text-gray-600 font-medium mb-2">Database:</p>
-                            <p className="text-2xl font-bold text-green-600">SQLite</p>
+                            <p className="text-2xl font-bold text-green-600">PostgreSQL</p>
                         </div>
                         <div className="bg-white p-6 rounded-lg border border-gray-200">
                             <p className="text-gray-600 font-medium mb-2">Waktu Server:</p>
@@ -439,7 +454,7 @@ export default function SettingsPage() {
                         </div>
                         <div className="bg-white p-6 rounded-lg border border-gray-200">
                             <p className="text-gray-600 font-medium mb-2">Event Pemilihan:</p>
-                            <p className="text-lg font-bold text-orange-600">Ketua OSIS SMK N 2 Malinau 2025</p>
+                            <p className="text-lg font-bold text-orange-600">{eventTitle} {schoolShortName} {eventYear}</p>
                         </div>
                     </div>
                 </div>

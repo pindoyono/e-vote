@@ -12,7 +12,8 @@ import {
     LogOut,
     Menu,
     X,
-    RotateCcw
+    RotateCcw,
+    ExternalLink
 } from 'lucide-react'
 
 interface AdminLayoutProps {
@@ -33,9 +34,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const pathname = usePathname()
     const [sidebarOpen, setSidebarOpen] = useState(false)
     const [config, setConfig] = useState({
-        schoolShortName: 'SMK N2 Malinau',
-        eventTitle: 'Pemilihan Ketua OSIS',
-        eventYear: '2025'
+        npsn: '',
+        schoolShortName: '',
+        eventTitle: '',
+        eventYear: ''
     })
 
     useEffect(() => {
@@ -43,9 +45,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             .then(res => res.json())
             .then(data => {
                 setConfig({
-                    schoolShortName: data.schoolShortName || 'SMK N2 Malinau',
-                    eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
-                    eventYear: data.eventYear || '2025'
+                    npsn: data.npsn || '',
+                    schoolShortName: data.schoolShortName || '',
+                    eventTitle: data.eventTitle || '',
+                    eventYear: data.eventYear || ''
                 })
             })
             .catch(err => console.error('Failed to load config:', err))
@@ -99,7 +102,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         </div>
                     </div>
                     <button
-                        onClick={() => signOut()}
+                        onClick={() => signOut({ callbackUrl: '/admin/login' })}
                         className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     >
                         <LogOut className="mr-2 h-4 w-4" />
@@ -128,10 +131,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             <Menu className="h-6 w-6" />
                         </button>
 
-                        <div className="flex-1 lg:ml-0">
+                        <div className="flex-1 lg:ml-0 flex items-center justify-between">
                             <h1 className="text-lg font-semibold text-gray-900">
                                 {config.schoolShortName} - {config.eventTitle} {config.eventYear}
                             </h1>
+                            {config.npsn && (
+                                <a
+                                    href={`/s/${config.npsn}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hidden sm:flex items-center text-sm text-blue-600 hover:text-blue-800"
+                                >
+                                    Halaman publik sekolah
+                                    <ExternalLink className="ml-1 h-4 w-4" />
+                                </a>
+                            )}
                         </div>
                     </div>
                 </header>

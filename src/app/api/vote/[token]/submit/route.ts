@@ -1,5 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { findVoterByToken } from '@/lib/school'
+import { isUniqueViolation } from '@/lib/db-errors'
+
+class AlreadyVotedError extends Error {}
 
 export async function POST(
     request: Request,
@@ -9,19 +13,14 @@ export async function POST(
         const { candidateId } = await request.json()
         const { token } = await params
 
-        if (!candidateId) {
+        if (!candidateId || typeof candidateId !== 'string') {
             return NextResponse.json(
                 { error: 'Candidate ID is required' },
                 { status: 400 }
             )
         }
 
-        const voter = await prisma.voter.findFirst({
-            where: {
-                voteToken: token,
-                isVerified: true
-            }
-        })
+        const voter = await findVoterByToken(token)
 
         if (!voter) {
             return NextResponse.json(
@@ -37,9 +36,8 @@ export async function POST(
             )
         }
 
-        // Check if voting is active
-        const votingSession = await prisma.votingSession.findFirst({
-            where: { id: 'default' }
+        const votingSession = await prisma.votingSession.findUnique({
+            where: { schoolId: voter.schoolId }
         })
 
         if (!votingSession?.isActive) {
@@ -49,9 +47,9 @@ export async function POST(
             )
         }
 
-        // Verify candidate exists
-        const candidate = await prisma.candidate.findUnique({
-            where: { id: candidateId }
+        // Kandidat harus milik sekolah yang sama dengan pemilih
+        const candidate = await prisma.candidate.findFirst({
+            where: { id: candidateId, schoolId: voter.schoolId }
         })
 
         if (!candidate) {
@@ -61,29 +59,32 @@ export async function POST(
             )
         }
 
-        // Get IP address and user agent for logging
-        const ip = request.headers.get('x-forwarded-for') ||
-            request.headers.get('x-real-ip') ||
+        // nginx mengisi X-Real-IP dengan IP klien yang sebenarnya
+        const ip = request.headers.get('x-real-ip') ||
+            request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
             'unknown'
-        const userAgent = request.headers.get('user-agent') || 'unknown'
+        const userAgent = request.headers.get('user-agent')?.slice(0, 500) || 'unknown'
 
-        // Submit vote in transaction
+        // Tandai sudah memilih secara atomik: dua request bersamaan tidak bisa sama-sama lolos
         await prisma.$transaction(async (tx) => {
-            // Create vote record
+            const marked = await tx.voter.updateMany({
+                where: { id: voter.id, hasVoted: false },
+                data: { hasVoted: true }
+            })
+
+            if (marked.count === 0) {
+                throw new AlreadyVotedError()
+            }
+
             await tx.vote.create({
                 data: {
+                    schoolId: voter.schoolId,
                     voterId: voter.id,
-                    candidateId: candidateId,
-                    voteToken: token,
+                    candidateId: candidate.id,
+                    voteToken: voter.voteToken!,
                     ipAddress: ip,
                     userAgent: userAgent
                 }
-            })
-
-            // Mark voter as voted
-            await tx.voter.update({
-                where: { id: voter.id },
-                data: { hasVoted: true }
             })
         })
 
@@ -93,6 +94,12 @@ export async function POST(
         })
 
     } catch (error) {
+        if (error instanceof AlreadyVotedError || isUniqueViolation(error)) {
+            return NextResponse.json(
+                { error: 'Anda sudah melakukan voting' },
+                { status: 400 }
+            )
+        }
         console.error('Error submitting vote:', error)
         return NextResponse.json(
             { error: 'Terjadi kesalahan server' },

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { findVoterByToken, publicSchool } from '@/lib/school'
 
 export async function GET(
     request: Request,
@@ -7,13 +8,7 @@ export async function GET(
 ) {
     try {
         const { token } = await params
-
-        const voter = await prisma.voter.findFirst({
-            where: {
-                voteToken: token,
-                isVerified: true
-            }
-        })
+        const voter = await findVoterByToken(token)
 
         if (!voter) {
             return NextResponse.json(
@@ -22,12 +17,8 @@ export async function GET(
             )
         }
 
-        const candidates = await prisma.candidate.findMany({
-            orderBy: { orderNumber: 'asc' }
-        })
-
-        const votingSession = await prisma.votingSession.findFirst({
-            where: { isActive: true }
+        const votingSession = await prisma.votingSession.findUnique({
+            where: { schoolId: voter.schoolId }
         })
 
         if (!votingSession?.isActive) {
@@ -37,12 +28,18 @@ export async function GET(
             )
         }
 
+        const candidates = await prisma.candidate.findMany({
+            where: { schoolId: voter.schoolId },
+            orderBy: { orderNumber: 'asc' }
+        })
+
         return NextResponse.json({
             voter: {
                 name: voter.name,
                 class: voter.class,
                 hasVoted: voter.hasVoted
             },
+            school: publicSchool(voter.school),
             candidates,
             votingSession
         })

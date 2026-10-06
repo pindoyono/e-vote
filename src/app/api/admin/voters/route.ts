@@ -1,18 +1,16 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { requireSchoolUser } from '@/lib/tenant'
 import { voterSchema } from '@/lib/validations'
+import { isUniqueViolation } from '@/lib/db-errors'
 
 export async function GET() {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+
     try {
-        const session = await getServerSession(authOptions)
-
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
         const voters = await prisma.voter.findMany({
+            where: { schoolId: auth.schoolId },
             include: {
                 votes: {
                     include: {
@@ -39,34 +37,27 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+
     try {
-        const session = await getServerSession(authOptions)
-
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        const body = await request.json()
-        const validatedData = voterSchema.parse(body)
-
-        // Check if NISN already exists
-        const existingVoter = await prisma.voter.findUnique({
-            where: { nisn: validatedData.nisn }
-        })
-
-        if (existingVoter) {
-            return NextResponse.json(
-                { error: 'NISN sudah terdaftar' },
-                { status: 400 }
-            )
+        const parsed = voterSchema.safeParse(await request.json())
+        if (!parsed.success) {
+            return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
         }
 
         const voter = await prisma.voter.create({
-            data: validatedData
+            data: { ...parsed.data, schoolId: auth.schoolId }
         })
 
         return NextResponse.json(voter)
     } catch (error) {
+        if (isUniqueViolation(error)) {
+            return NextResponse.json(
+                { error: 'NISN/NIS sudah terdaftar' },
+                { status: 400 }
+            )
+        }
         console.error('Create voter error:', error)
         return NextResponse.json(
             { error: 'Failed to create voter' },

@@ -1,25 +1,20 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { requireSchoolUser } from '@/lib/tenant'
 
 // Reset specific voter's vote
 export async function DELETE(
     request: Request,
     { params }: { params: Promise<{ id: string }> }
 ) {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+
     try {
-        const session = await getServerSession(authOptions)
-
-        if (!session || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
         const { id } = await params
 
-        // Check if voter exists and has voted
-        const voter = await prisma.voter.findUnique({
-            where: { id }
+        const voter = await prisma.voter.findFirst({
+            where: { id, schoolId: auth.schoolId }
         })
 
         if (!voter) {
@@ -30,22 +25,15 @@ export async function DELETE(
             return NextResponse.json({ error: 'Voter has not voted yet' }, { status: 400 })
         }
 
-        // Delete the voter's vote
-        await prisma.vote.deleteMany({
-            where: {
-                voterId: id
-            }
-        })
+        await prisma.$transaction([
+            prisma.vote.deleteMany({ where: { voterId: id } }),
+            prisma.voter.update({
+                where: { id },
+                data: { hasVoted: false }
+            })
+        ])
 
-        // Reset voter's hasVoted status
-        await prisma.voter.update({
-            where: { id },
-            data: {
-                hasVoted: false
-            }
-        })
-
-        console.log(`Vote reset for voter ${voter.name} by admin:`, session.user.username)
+        console.log(`Vote reset for voter ${voter.id} by admin:`, auth.session.user.username)
 
         return NextResponse.json({
             success: true,

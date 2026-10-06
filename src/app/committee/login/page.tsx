@@ -1,18 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, User, Lock, Users } from 'lucide-react'
+import { Eye, EyeOff, User, Lock, Users, School } from 'lucide-react'
 import Link from 'next/link'
+import { loginErrorMessage, rememberedNpsn, rememberNpsn } from '@/lib/login-errors'
 
 export default function CommitteeLogin() {
+    const [npsn, setNpsn] = useState('')
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const router = useRouter()
+
+    useEffect(() => {
+        setNpsn(rememberedNpsn())
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -21,14 +27,16 @@ export default function CommitteeLogin() {
 
         try {
             const result = await signIn('committee-credentials', {
+                npsn,
                 username,
                 password,
                 redirect: false,
             })
 
             if (result?.error) {
-                setError('Username atau password panitia salah. Silakan periksa kembali data login Anda.')
+                setError(loginErrorMessage(result.error, 'NPSN, username, atau password panitia salah. Silakan periksa kembali data login Anda.'))
             } else {
+                rememberNpsn(npsn)
                 router.push('/committee/verification')
             }
         } catch (error) {
@@ -50,10 +58,7 @@ export default function CommitteeLogin() {
                         Portal Panitia
                     </h1>
                     <p className="text-green-200">
-                        SMK Negeri 2 Malinau
-                    </p>
-                    <p className="text-green-300 text-sm">
-                        Sistem Verifikasi Pemilih OSIS 2025
+                        Sistem Verifikasi Pemilih
                     </p>
                 </div>
 
@@ -74,6 +79,26 @@ export default function CommitteeLogin() {
                                 {error}
                             </div>
                         )}
+
+                        <div>
+                            <label className="block text-gray-800 text-sm font-semibold mb-3">
+                                NPSN Sekolah
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <School className="h-5 w-5 text-gray-500" />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={npsn}
+                                    onChange={(e) => setNpsn(e.target.value.toUpperCase())}
+                                    maxLength={8}
+                                    className="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all duration-200 text-gray-900 font-mono font-medium tracking-wider"
+                                    placeholder="8 karakter NPSN"
+                                    required
+                                />
+                            </div>
+                        </div>
 
                         <div>
                             <label className="block text-gray-800 text-sm font-semibold mb-3">

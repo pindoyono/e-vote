@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { requireAdmin } from '@/lib/require-admin'
+import { requireSchoolUser } from '@/lib/tenant'
+import { schoolConfigSchema } from '@/lib/validations'
 
-// GET - Get all config values
+// GET - Konfigurasi sekolah milik user yang login (admin/panitia)
 export async function GET() {
+    const auth = await requireSchoolUser(['admin', 'committee'])
+    if ('response' in auth) return auth.response
+
     try {
-        const configs = await prisma.config.findMany()
+        const school = await prisma.school.findUniqueOrThrow({ where: { id: auth.schoolId } })
 
-        // Convert array to object
-        const configObject: Record<string, string> = {}
-        configs.forEach(config => {
-            configObject[config.key] = config.value
+        return NextResponse.json({
+            npsn: school.npsn,
+            level: school.level,
+            schoolName: school.name,
+            schoolShortName: school.shortName,
+            eventTitle: school.eventTitle,
+            eventYear: school.eventYear,
         })
-
-        return NextResponse.json(configObject)
     } catch (error) {
         console.error('Get config error:', error)
         return NextResponse.json(
@@ -23,31 +28,22 @@ export async function GET() {
     }
 }
 
-// POST - Update config values
+// POST - Ubah nama sekolah & judul pemilihan
 export async function POST(request: Request) {
-    const denied = await requireAdmin()
-    if (denied) return denied
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
 
     try {
-        const body = await request.json()
+        const parsed = schoolConfigSchema.safeParse(await request.json())
+        if (!parsed.success) {
+            return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 })
+        }
 
-        // Update each config key
-        const promises = Object.keys(body).map(key =>
-            prisma.config.upsert({
-                where: { key },
-                update: {
-                    value: body[key],
-                    updatedAt: new Date()
-                },
-                create: {
-                    key,
-                    value: body[key],
-                    updatedAt: new Date()
-                }
-            })
-        )
-
-        await Promise.all(promises)
+        const { schoolName, schoolShortName, eventTitle, eventYear } = parsed.data
+        await prisma.school.update({
+            where: { id: auth.schoolId },
+            data: { name: schoolName, shortName: schoolShortName, eventTitle, eventYear }
+        })
 
         return NextResponse.json({ success: true, message: 'Konfigurasi berhasil disimpan' })
     } catch (error) {

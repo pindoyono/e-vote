@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "E-Vote SMK N 2 Malinau - Pemilihan Ketua OSIS 2025",
-  description: "Sistem pemilihan elektronik untuk memilih ketua OSIS SMK Negeri 2 Malinau tahun 2025",
+  title: "E-Vote Sekolah - Pemilihan Elektronik untuk Semua Jenjang",
+  description: "Platform pemilihan elektronik (ketua OSIS, ketua kelas, dll.) untuk SD, SMP, SMA, SMK, madrasah, dan sekolah lainnya",
 };
 
 export default function RootLayout({

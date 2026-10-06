@@ -38,33 +38,14 @@ export default function VotingPage() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
     const [config, setConfig] = useState<Config>({
-        schoolName: 'SMK Negeri 2 Malinau',
-        schoolShortName: 'SMKN 2 Malinau',
-        eventTitle: 'Pemilihan Ketua OSIS',
-        eventYear: '2025'
+        schoolName: '',
+        schoolShortName: '',
+        eventTitle: '',
+        eventYear: ''
     })
 
     const voteToken = params.token as string
 
-    useEffect(() => {
-        const fetchConfig = async () => {
-            try {
-                const response = await fetch('/api/admin/config')
-                if (response.ok) {
-                    const data = await response.json()
-                    setConfig({
-                        schoolName: data.schoolName || 'SMK Negeri 2 Malinau',
-                        schoolShortName: data.schoolShortName || 'SMKN 2 Malinau',
-                        eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
-                        eventYear: data.eventYear || '2025'
-                    })
-                }
-            } catch (error) {
-                console.error('Error fetching config:', error)
-            }
-        }
-        fetchConfig()
-    }, [])
 
     useEffect(() => {
         const fetchVotingData = async () => {
@@ -78,6 +59,7 @@ export default function VotingPage() {
                 const data = await response.json()
                 setVoter(data.voter)
                 setCandidates(data.candidates)
+                if (data.school) setConfig(data.school)
 
                 if (data.voter.hasVoted) {
                     // Redirect to thank you page if already voted

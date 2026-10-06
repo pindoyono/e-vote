@@ -338,7 +338,7 @@ export default function VotersPage() {
                                     Template Import CSV
                                 </p>
                                 <p className="text-sm text-blue-700">
-                                    Format: Nama, Kelas, NISN (tanpa header)
+                                    Format: Nama, Kelas, NISN/NIS (tanpa header)
                                 </p>
                             </div>
                         </div>

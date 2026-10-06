@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { findVoterByToken, publicSchool } from '@/lib/school'
 
 export async function GET(
     request: Request,
@@ -7,13 +7,7 @@ export async function GET(
 ) {
     try {
         const { token } = await params
-
-        const voter = await prisma.voter.findFirst({
-            where: {
-                voteToken: token,
-                isVerified: true
-            }
-        })
+        const voter = await findVoterByToken(token)
 
         if (!voter) {
             return NextResponse.json(
@@ -27,7 +21,8 @@ export async function GET(
                 name: voter.name,
                 class: voter.class,
                 hasVoted: voter.hasVoted
-            }
+            },
+            school: publicSchool(voter.school)
         })
     } catch (error) {
         console.error('Vote status API error:', error)

@@ -31,19 +31,18 @@ export default function VoterModal({ isOpen, onClose, onSave, voter }: VoterModa
         setSaving(true)
 
         try {
-            const validatedData = voterSchema.parse(formData)
-            await onSave(validatedData)
-            onClose()
-            setFormData({ name: '', class: '', nisn: '' })
-        } catch (error: unknown) {
-            if (error && typeof error === 'object' && 'errors' in error) {
-                const zodError = error as { errors: Array<{ path: string[]; message: string }> }
+            const parsed = voterSchema.safeParse(formData)
+            if (!parsed.success) {
                 const fieldErrors: Record<string, string> = {}
-                zodError.errors.forEach((err) => {
-                    fieldErrors[err.path[0]] = err.message
+                parsed.error.issues.forEach((issue) => {
+                    fieldErrors[String(issue.path[0])] = issue.message
                 })
                 setErrors(fieldErrors)
+                return
             }
+            await onSave(parsed.data)
+            onClose()
+            setFormData({ name: '', class: '', nisn: '' })
         } finally {
             setSaving(false)
         }
@@ -101,15 +100,15 @@ export default function VoterModal({ isOpen, onClose, onSave, voter }: VoterModa
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            NISN
+                            NISN / NIS
                         </label>
                         <input
                             type="text"
                             value={formData.nisn}
                             onChange={(e) => setFormData({ ...formData, nisn: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="10 digit NISN"
-                            maxLength={10}
+                            placeholder="NISN (10 digit) atau NIS"
+                            maxLength={20}
                         />
                         {errors.nisn && (
                             <p className="text-red-600 text-sm mt-1">{errors.nisn}</p>

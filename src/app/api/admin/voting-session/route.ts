@@ -1,18 +1,14 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { requireSchoolUser } from '@/lib/tenant'
 
 export async function GET() {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+
     try {
-        const session = await getServerSession(authOptions)
-
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        const votingSession = await prisma.votingSession.findFirst({
-            where: { id: 'default' }
+        const votingSession = await prisma.votingSession.findUnique({
+            where: { schoolId: auth.schoolId }
         })
 
         return NextResponse.json(votingSession)
@@ -26,26 +22,28 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-    try {
-        const session = await getServerSession(authOptions)
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
 
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    try {
+        const { isActive } = await request.json()
+        if (typeof isActive !== 'boolean') {
+            return NextResponse.json({ error: 'isActive harus boolean' }, { status: 400 })
         }
 
-        const { isActive } = await request.json()
+        const school = await prisma.school.findUniqueOrThrow({ where: { id: auth.schoolId } })
 
         const votingSession = await prisma.votingSession.upsert({
-            where: { id: 'default' },
+            where: { schoolId: auth.schoolId },
             update: {
                 isActive,
                 startTime: isActive ? new Date() : undefined,
                 endTime: !isActive ? new Date() : null,
             },
             create: {
-                id: 'default',
+                schoolId: auth.schoolId,
                 isActive,
-                description: 'Pemilihan Ketua OSIS SMK N 2 Malinau 2025',
+                description: `${school.eventTitle} ${school.name} ${school.eventYear}`,
                 startTime: isActive ? new Date() : undefined,
             }
         })

@@ -1,20 +1,32 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { findActiveSchoolByNpsn, publicSchool } from '@/lib/school'
 
-export async function GET() {
+// Hasil realtime publik satu sekolah: /api/monitoring/realtime?npsn=XXXXXXXX
+export async function GET(request: Request) {
     try {
+        const npsn = new URL(request.url).searchParams.get('npsn')
+        const school = npsn ? await findActiveSchoolByNpsn(npsn) : null
+
+        if (!school) {
+            return NextResponse.json({ error: 'Sekolah tidak ditemukan' }, { status: 404 })
+        }
+
+        const schoolId = school.id
+
         // Get basic stats
-        const totalVoters = await prisma.voter.count()
+        const totalVoters = await prisma.voter.count({ where: { schoolId } })
         const verifiedVoters = await prisma.voter.count({
-            where: { isVerified: true }
+            where: { schoolId, isVerified: true }
         })
-        const totalVotes = await prisma.vote.count()
+        const totalVotes = await prisma.vote.count({ where: { schoolId } })
 
         // Calculate participation rate
         const participationRate = verifiedVoters > 0 ? (totalVotes / verifiedVoters) * 100 : 0
 
         // Get candidates with vote counts
         const candidates = await prisma.candidate.findMany({
+            where: { schoolId },
             orderBy: { orderNumber: 'asc' },
             include: {
                 _count: {
@@ -34,6 +46,7 @@ export async function GET() {
 
         // Get recent votes (last 10)
         const recentVotes = await prisma.vote.findMany({
+            where: { schoolId },
             take: 10,
             orderBy: { createdAt: 'desc' },
             include: {
@@ -55,6 +68,7 @@ export async function GET() {
 
         const hourlyVotes = await prisma.vote.findMany({
             where: {
+                schoolId,
                 createdAt: {
                     gte: twentyFourHoursAgo
                 }
@@ -88,6 +102,7 @@ export async function GET() {
         }))
 
         const realtimeStats = {
+            school: publicSchool(school),
             totalVoters,
             verifiedVoters,
             totalVotes,

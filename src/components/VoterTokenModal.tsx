@@ -7,9 +7,12 @@ import { useRouter } from 'next/navigation'
 interface VoterTokenModalProps {
     isOpen: boolean
     onClose: () => void
+    subtitle?: string
 }
 
-export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProps) {
+const TOKEN_LENGTH = 8
+
+export default function VoterTokenModal({ isOpen, onClose, subtitle = 'E-Vote Sekolah' }: VoterTokenModalProps) {
     const [token, setToken] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -26,8 +29,8 @@ export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProp
             return
         }
 
-        if (token.length !== 5) {
-            setError('Token harus 5 karakter')
+        if (token.length !== TOKEN_LENGTH) {
+            setError(`Token harus ${TOKEN_LENGTH} karakter`)
             return
         }
 
@@ -51,7 +54,7 @@ export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProp
             }
 
             // Redirect to voting page
-            router.push(`/vote/${token}`)
+            router.push(data.voteUrl || `/vote/${token}`)
         } catch (err) {
             setError('Terjadi kesalahan. Silakan coba lagi.')
             setLoading(false)
@@ -77,12 +80,12 @@ export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProp
                         </div>
                         <div>
                             <h2 className="text-2xl font-bold text-gray-900">Portal Pemilih</h2>
-                            <p className="text-sm text-purple-600 font-medium">Pemilihan Ketua OSIS 2025</p>
+                            <p className="text-sm text-purple-600 font-medium">{subtitle}</p>
                         </div>
                     </div>
                     <div className="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
                         <p className="text-sm text-blue-800 font-medium">
-                            Masukkan <span className="font-bold">kode token</span> yang Anda terima dari panitia untuk mulai memilih kandidat Ketua OSIS.
+                            Masukkan <span className="font-bold">kode token</span> yang Anda terima dari panitia untuk mulai memilih kandidat.
                         </p>
                     </div>
                 </div>
@@ -98,11 +101,13 @@ export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProp
                             id="token"
                             value={token}
                             onChange={(e) => {
-                                setToken(e.target.value)
+                                setToken(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))
                                 setError('')
                             }}
-                            maxLength={5}
-                            placeholder="ABC12"
+                            maxLength={TOKEN_LENGTH}
+                            placeholder="ABCD2345"
+                            autoComplete="off"
+                            autoCapitalize="characters"
                             className="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-center text-3xl font-mono font-bold tracking-widest shadow-sm text-gray-900 bg-white placeholder:text-gray-400"
                             disabled={loading}
                             autoFocus
@@ -111,13 +116,13 @@ export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProp
                             <div className="flex items-center justify-center space-x-2">
                                 <div className="h-1 w-1 bg-gray-400 rounded-full"></div>
                                 <p className="text-sm text-gray-600">
-                                    Token terdiri dari <span className="font-semibold text-gray-900">5 karakter</span> (huruf dan angka)
+                                    Token terdiri dari <span className="font-semibold text-gray-900">{TOKEN_LENGTH} karakter</span> (huruf dan angka)
                                 </p>
                             </div>
                             <div className="flex items-center justify-center space-x-2">
                                 <div className="h-1 w-1 bg-gray-400 rounded-full"></div>
                                 <p className="text-sm text-gray-600">
-                                    Contoh format: <span className="font-mono font-bold text-purple-600">ABC12</span>, <span className="font-mono font-bold text-purple-600">XY789</span>
+                                    Contoh format: <span className="font-mono font-bold text-purple-600">ABCD2345</span>, <span className="font-mono font-bold text-purple-600">XY7K9MPQ</span>
                                 </p>
                             </div>
                         </div>
@@ -188,7 +193,7 @@ export default function VoterTokenModal({ isOpen, onClose }: VoterTokenModalProp
                                 </li>
                                 <li className="flex items-start">
                                     <span className="font-bold text-purple-600 mr-2">2.</span>
-                                    <span>Hubungi panitia OSIS jika belum menerima token</span>
+                                    <span>Hubungi panitia pemilihan di sekolah Anda jika belum menerima token</span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="font-bold text-purple-600 mr-2">3.</span>

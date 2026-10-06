@@ -1,26 +1,22 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { requireSchoolUser } from '@/lib/tenant'
 
 // Reset all verifications
 export async function POST() {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+
     try {
-        const session = await getServerSession(authOptions)
-
-        if (!session || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Reset all voters' verification status and remove vote tokens
         const result = await prisma.voter.updateMany({
+            where: { schoolId: auth.schoolId },
             data: {
                 isVerified: false,
                 voteToken: null
             }
         })
 
-        console.log(`All verifications reset by admin:`, session.user.username, `- ${result.count} voters affected`)
+        console.log(`All verifications reset by admin:`, auth.session.user.username, `- ${result.count} voters affected`)
 
         return NextResponse.json({
             success: true,

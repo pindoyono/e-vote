@@ -6,11 +6,51 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Admin {
+enum SchoolStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+// Satu sekolah = satu penyelenggara pemilihan; NPSN sebagai identitas unik
+model School {
+  id           String       @id @default(cuid())
+  npsn         String       @unique
+  name         String
+  shortName    String
+  level        String
+  address      String?
+  city         String?
+  province     String?
+  contactName  String
+  contactPhone String
+  contactEmail String?
+  eventTitle   String       @default("Pemilihan Ketua OSIS")
+  eventYear    String
+  status       SchoolStatus @default(PENDING)
+  statusNote   String?
+  approvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  admins        Admin[]
+  committees    Committee[]
+  candidates    Candidate[]
+  voters        Voter[]
+  votes         Vote[]
+  votingSession VotingSession?
+
+  @@index([status])
+  @@map("schools")
+}
+
+// Pengelola platform yang menyetujui pendaftaran sekolah
+model PlatformAdmin {
   id        String   @id @default(cuid())
   username  String   @unique
   password  String
@@ -18,12 +58,28 @@ model Admin {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@map("platform_admins")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  schoolId  String
+  username  String
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, username])
   @@map("admins")
 }
 
 model Committee {
   id        String   @id @default(cuid())
-  username  String   @unique
+  schoolId  String
+  username  String
   password  String
   name      String
   role      String   @default("verifikator")
@@ -31,71 +87,82 @@ model Committee {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, username])
   @@map("committees")
 }
 
 model Candidate {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
+  schoolId    String
   name        String
   class       String
   vision      String
   mission     String
   photo       String?
-  orderNumber Int    @unique
+  orderNumber Int
   votes       Vote[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, orderNumber])
   @@map("candidates")
 }
 
 model Voter {
-  id        String   @id @default(cuid())
-  name      String
-  class     String
-  nisn      String   @unique
-  isVerified Boolean @default(false)
-  hasVoted  Boolean  @default(false)
-  voteToken String?  @unique
-  votes     Vote[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  schoolId   String
+  name       String
+  class      String
+  nisn       String
+  isVerified Boolean  @default(false)
+  hasVoted   Boolean  @default(false)
+  voteToken  String?  @unique
+  votes      Vote[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, nisn])
+  @@index([schoolId, isVerified])
   @@map("voters")
 }
 
 model Vote {
-  id          String    @id @default(cuid())
-  voterId     String
+  id          String   @id @default(cuid())
+  schoolId    String
+  voterId     String   @unique
   candidateId String
   voteToken   String
   ipAddress   String?
   userAgent   String?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 
-  voter     Voter     @relation(fields: [voterId], references: [id])
-  candidate Candidate @relation(fields: [candidateId], references: [id])
+  school    School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  // NoAction: pemilih/kandidat yang sudah punya suara tidak bisa dihapus (hasil tidak berubah diam-diam)
+  voter     Voter     @relation(fields: [voterId], references: [id], onDelete: NoAction)
+  candidate Candidate @relation(fields: [candidateId], references: [id], onDelete: NoAction)
 
-  @@unique([voterId, candidateId])
+  @@index([schoolId, createdAt])
+  @@index([candidateId])
   @@map("votes")
 }
 
 model VotingSession {
-  id          String   @id @default(cuid())
-  isActive    Boolean  @default(false)
+  id          String    @id @default(cuid())
+  schoolId    String    @unique
+  isActive    Boolean   @default(false)
   startTime   DateTime?
   endTime     DateTime?
   description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   @@map("voting_sessions")
-}
-
-model Config {
-  key       String   @id
-  value     String
-  updatedAt DateTime @updatedAt
-
-  @@map("configs")
 }

@@ -1,169 +1,139 @@
 'use client'
 
 import Link from 'next/link'
-import { Vote, Users, BarChart3, Shield } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { Vote, Users, BarChart3, Shield, School, Search, ClipboardCheck, KeyRound } from 'lucide-react'
 import VoterTokenModal from '@/components/VoterTokenModal'
 
-export default function HomePage() {
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [config, setConfig] = useState({
-        schoolName: 'SMK Negeri 2 Malinau',
-        eventTitle: 'Pemilihan Ketua OSIS',
-        eventYear: '2025'
-    })
+const steps = [
+    { icon: School, title: 'Daftarkan sekolah', text: 'Isi NPSN, nama sekolah, dan akun admin. Pengelola platform memverifikasi pendaftaran.' },
+    { icon: ClipboardCheck, title: 'Siapkan data', text: 'Atur judul pemilihan, impor data pemilih (CSV), tambahkan kandidat, dan buat akun panitia.' },
+    { icon: KeyRound, title: 'Verifikasi & token', text: 'Panitia memverifikasi pemilih di hari H; setiap pemilih menerima token unik 8 karakter.' },
+    { icon: BarChart3, title: 'Memilih & pantau', text: 'Pemilih memasukkan token lalu memilih. Hasil dipantau langsung secara realtime.' },
+]
 
-    useEffect(() => {
-        // Fetch config from API
-        fetch('/api/admin/config')
-            .then(res => res.json())
-            .then(data => {
-                setConfig({
-                    schoolName: data.schoolName || 'SMK Negeri 2 Malinau',
-                    eventTitle: data.eventTitle || 'Pemilihan Ketua OSIS',
-                    eventYear: data.eventYear || '2025'
-                })
-            })
-            .catch(err => console.error('Failed to load config:', err))
-    }, [])
+export default function HomePage() {
+    const router = useRouter()
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const [npsn, setNpsn] = useState('')
+
+    const openSchool = (e: React.FormEvent) => {
+        e.preventDefault()
+        const value = npsn.trim().toUpperCase()
+        if (value) router.push(`/s/${encodeURIComponent(value)}`)
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900">
-            {/* Hero Section */}
-            <div className="flex items-center justify-center min-h-screen px-4">
-                <div className="text-center max-w-4xl mx-auto">
-                    {/* Logo/Icon */}
-                    <div className="mb-8">
-                        <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-2xl mb-6">
-                            <Vote className="w-12 h-12 text-blue-600" />
-                        </div>
+            <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+                {/* Hero */}
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-white rounded-full shadow-2xl mb-6">
+                    <Vote className="w-12 h-12 text-blue-600" />
+                </div>
+                <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">E-VOTE SEKOLAH</h1>
+                <h2 className="text-xl md:text-2xl font-semibold text-blue-200 mb-6">
+                    Pemilihan elektronik untuk SD, SMP, SMA, SMK, madrasah, dan sekolah lainnya
+                </h2>
+                <p className="text-lg text-blue-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+                    Selenggarakan pemilihan ketua OSIS, ketua kelas, atau pemilihan lainnya secara aman, transparan,
+                    dan modern. Setiap sekolah mengelola datanya sendiri dengan NPSN sebagai identitas.
+                </p>
+
+                {/* CTA */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto mb-6">
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg flex items-center justify-center space-x-2 transition-colors"
+                    >
+                        <Vote className="h-5 w-5" />
+                        <span>Saya Pemilih (Masukkan Token)</span>
+                    </button>
+                    <Link
+                        href="/daftar"
+                        className="bg-yellow-400 hover:bg-yellow-300 text-blue-950 font-bold py-4 px-6 rounded-lg shadow-lg flex items-center justify-center space-x-2 transition-colors"
+                    >
+                        <School className="h-5 w-5" />
+                        <span>Daftarkan Sekolah</span>
+                    </Link>
+                    <Link
+                        href="/admin/login"
+                        className="bg-white hover:bg-gray-100 text-blue-900 font-bold py-4 px-6 rounded-lg shadow-lg flex items-center justify-center space-x-2 transition-colors"
+                    >
+                        <Shield className="h-5 w-5" />
+                        <span>Masuk Admin Sekolah</span>
+                    </Link>
+                    <Link
+                        href="/committee/login"
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg shadow-lg flex items-center justify-center space-x-2 transition-colors"
+                    >
+                        <Users className="h-5 w-5" />
+                        <span>Masuk Panitia</span>
+                    </Link>
+                </div>
+
+                {/* Cari sekolah */}
+                <form onSubmit={openSchool} className="max-w-3xl mx-auto bg-white/10 border border-white/20 rounded-lg p-4 mb-16 flex flex-col sm:flex-row gap-3">
+                    <label htmlFor="npsn" className="text-blue-100 text-sm font-medium sm:self-center sm:whitespace-nowrap">
+                        Lihat halaman &amp; hasil sekolah:
+                    </label>
+                    <input
+                        id="npsn"
+                        value={npsn}
+                        onChange={(e) => setNpsn(e.target.value)}
+                        placeholder="Masukkan NPSN (8 karakter)"
+                        maxLength={8}
+                        className="flex-1 px-4 py-2 rounded-lg text-gray-900 bg-white font-mono tracking-wider"
+                    />
+                    <button type="submit" className="bg-blue-500 hover:bg-blue-400 text-white font-semibold px-5 py-2 rounded-lg flex items-center justify-center space-x-2">
+                        <Search className="h-4 w-4" />
+                        <span>Buka</span>
+                    </button>
+                </form>
+
+                {/* Cara kerja */}
+                <h3 className="text-2xl font-bold text-white mb-6">Cara Kerja</h3>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-16 text-left">
+                    {steps.map((step, i) => {
+                        const Icon = step.icon
+                        return (
+                            <div key={step.title} className="bg-white/10 backdrop-blur-sm rounded-lg p-5 border border-white/20">
+                                <div className="flex items-center mb-3">
+                                    <span className="bg-white text-blue-900 font-bold rounded-full w-7 h-7 flex items-center justify-center mr-3">{i + 1}</span>
+                                    <Icon className="h-6 w-6 text-blue-200" />
+                                </div>
+                                <h4 className="text-lg font-semibold text-white mb-1">{step.title}</h4>
+                                <p className="text-blue-200 text-sm">{step.text}</p>
+                            </div>
+                        )
+                    })}
+                </div>
+
+                {/* Fitur */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div className="bg-white/10 rounded-lg p-6 border border-white/20">
+                        <Shield className="w-10 h-10 text-green-400 mx-auto mb-3" />
+                        <h4 className="text-lg font-semibold text-white mb-1">Aman</h4>
+                        <p className="text-blue-200 text-sm">Data tiap sekolah terpisah, pemilih diverifikasi panitia, satu token satu suara</p>
                     </div>
-
-                    {/* Main Title */}
-                    <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
-                        E-VOTE
-                    </h1>
-                    <h2 className="text-2xl md:text-3xl font-semibold text-blue-200 mb-6">
-                        {config.eventTitle}
-                    </h2>
-                    <h3 className="text-xl md:text-2xl text-blue-300 mb-8">
-                        {config.schoolName}
-                    </h3>
-
-                    {/* Description */}
-                    <p className="text-lg text-blue-100 mb-12 max-w-2xl mx-auto leading-relaxed">
-                        Sistem pemilihan elektronik yang aman, transparan, dan modern untuk
-                        memilih ketua OSIS periode {config.eventYear}. Setiap suara berharga dan akan dihitung
-                        dengan akurat.
-                    </p>
-
-                    {/* Features */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                            <Shield className="w-12 h-12 text-green-400 mx-auto mb-4" />
-                            <h4 className="text-xl font-semibold text-white mb-2">Aman</h4>
-                            <p className="text-blue-200 text-sm">
-                                Sistem keamanan berlapis dengan verifikasi identitas
-                            </p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                            <Users className="w-12 h-12 text-blue-400 mx-auto mb-4" />
-                            <h4 className="text-xl font-semibold text-white mb-2">Transparan</h4>
-                            <p className="text-blue-200 text-sm">
-                                Monitoring hasil secara realtime dan akurat
-                            </p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                            <BarChart3 className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-                            <h4 className="text-xl font-semibold text-white mb-2">Modern</h4>
-                            <p className="text-blue-200 text-sm">
-                                Interface yang mudah digunakan dan responsive
-                            </p>
-                        </div>
+                    <div className="bg-white/10 rounded-lg p-6 border border-white/20">
+                        <Users className="w-10 h-10 text-blue-300 mx-auto mb-3" />
+                        <h4 className="text-lg font-semibold text-white mb-1">Transparan</h4>
+                        <p className="text-blue-200 text-sm">Hasil bisa dipantau realtime di halaman publik sekolah</p>
                     </div>
-
-                    {/* CTA Buttons */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
-                        <Link
-                            href="/admin/login"
-                            className="bg-white hover:bg-gray-100 text-blue-900 font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
-                        >
-                            <Shield className="h-5 w-5" />
-                            <span>Admin Panel</span>
-                        </Link>
-                        <Link
-                            href="/committee/login"
-                            className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
-                        >
-                            <Users className="h-5 w-5" />
-                            <span>Portal Panitia</span>
-                        </Link>
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2"
-                        >
-                            <Vote className="h-5 w-5" />
-                            <span>Portal Pemilih</span>
-                        </button>
-                        <Link
-                            href="/monitoring"
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition-colors duration-200 shadow-lg flex items-center justify-center space-x-2 sm:col-span-2 lg:col-span-3"
-                        >
-                            <BarChart3 className="h-5 w-5" />
-                            <span>Monitoring Hasil</span>
-                        </Link>
+                    <div className="bg-white/10 rounded-lg p-6 border border-white/20">
+                        <BarChart3 className="w-10 h-10 text-purple-300 mx-auto mb-3" />
+                        <h4 className="text-lg font-semibold text-white mb-1">Untuk Semua Jenjang</h4>
+                        <p className="text-blue-200 text-sm">SD/MI, SMP/MTs, SMA/MA/SMK, SLB, dan satuan pendidikan lain</p>
                     </div>
+                </div>
 
-                    {/* Role Description */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                            <h4 className="text-lg font-semibold text-white mb-2">Administrator</h4>
-                            <p className="text-blue-200 text-sm">
-                                Kelola data pemilih, atur sistem, dan kontrol penuh aplikasi
-                            </p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                            <h4 className="text-lg font-semibold text-white mb-2">Panitia</h4>
-                            <p className="text-blue-200 text-sm">
-                                Verifikasi pemilih dan generate URL voting untuk siswa
-                            </p>
-                        </div>
-                        <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                            <h4 className="text-lg font-semibold text-white mb-2">Pemilih</h4>
-                            <p className="text-blue-200 text-sm">
-                                Masukkan token untuk akses halaman voting dan pilih kandidat
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Info */}
-                    <div className="mt-12 bg-yellow-100 border border-yellow-300 rounded-lg p-6 text-yellow-800">
-                        <h4 className="font-semibold mb-2">Informasi Penting:</h4>
-                        <ul className="text-sm space-y-1 text-left max-w-lg mx-auto">
-                            <li>• Pemilihan dilakukan secara online dengan URL unik</li>
-                            <li>• Setiap pemilih harus diverifikasi terlebih dahulu oleh panitia</li>
-                            <li>• Satu pemilih hanya dapat memberikan satu suara</li>
-                            <li>• Hasil dapat dipantau secara realtime</li>
-                        </ul>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="mt-16 pt-8 border-t border-white/20">
-                        <p className="text-blue-300 text-sm">
-                            © 2025 SMK Negeri 2 Malinau - Sistem E-Voting Pemilihan Ketua OSIS
-                        </p>
-                        <p className="text-blue-400 text-xs mt-2">
-                            Dikembangkan dengan teknologi Next.js dan keamanan tingkat tinggi
-                        </p>
-                    </div>
+                <div className="pt-8 border-t border-white/20">
+                    <p className="text-blue-300 text-sm">© {new Date().getFullYear()} E-Vote Sekolah</p>
                 </div>
             </div>
 
-            {/* Voter Token Modal */}
-            <VoterTokenModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-            />
+            <VoterTokenModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     )
 }

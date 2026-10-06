@@ -1,23 +1,19 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { requireSchoolUser } from '@/lib/tenant'
 
 export async function POST() {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+    const { schoolId } = auth
+
     try {
-        const session = await getServerSession(authOptions)
-
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Reset voting in transaction
+        // Reset voting sekolah ini saja, dalam satu transaksi
         await prisma.$transaction(async (tx) => {
-            // Delete all votes
-            await tx.vote.deleteMany()
+            await tx.vote.deleteMany({ where: { schoolId } })
 
-            // Reset all voters
             await tx.voter.updateMany({
+                where: { schoolId },
                 data: {
                     hasVoted: false,
                     isVerified: false,
@@ -25,8 +21,8 @@ export async function POST() {
                 }
             })
 
-            // Deactivate voting session
             await tx.votingSession.updateMany({
+                where: { schoolId },
                 data: {
                     isActive: false,
                     endTime: new Date()

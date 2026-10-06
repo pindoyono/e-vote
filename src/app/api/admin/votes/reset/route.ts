@@ -1,28 +1,23 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { requireSchoolUser } from '@/lib/tenant'
 
 // Reset all votes
 export async function DELETE() {
+    const auth = await requireSchoolUser(['admin'])
+    if ('response' in auth) return auth.response
+    const { schoolId } = auth
+
     try {
-        const session = await getServerSession(authOptions)
+        await prisma.$transaction([
+            prisma.vote.deleteMany({ where: { schoolId } }),
+            prisma.voter.updateMany({
+                where: { schoolId },
+                data: { hasVoted: false }
+            })
+        ])
 
-        if (!session || session.user.role !== 'admin') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        // Delete all votes
-        await prisma.vote.deleteMany()
-
-        // Reset all voters to hasVoted: false
-        await prisma.voter.updateMany({
-            data: {
-                hasVoted: false
-            }
-        })
-
-        console.log('All votes reset by admin:', session.user.username)
+        console.log('All votes reset by admin:', auth.session.user.username)
 
         return NextResponse.json({
             success: true,

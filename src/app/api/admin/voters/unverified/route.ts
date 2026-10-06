@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth-config'
 import { prisma } from '@/lib/prisma'
+import { requireSchoolUser } from '@/lib/tenant'
 
 export async function GET() {
+    const auth = await requireSchoolUser(['admin', 'committee'])
+    if ('response' in auth) return auth.response
+
     try {
-        const session = await getServerSession(authOptions)
-
-        if (!session) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
         const voters = await prisma.voter.findMany({
+            where: { schoolId: auth.schoolId },
             orderBy: { createdAt: 'desc' }
         })
 
